@@ -3,7 +3,7 @@
     <div class="signup">
       <el-button type="primary" @click="signup">注册</el-button>
     </div>
-    <el-col :xs="24" :sm="{span: 6, offset: 9}" class="login">
+    <el-col :xs="24" :sm="{span: 6, offset: 9}">
             <span class="title">
                 欢迎登录
             </span>
@@ -78,10 +78,6 @@
      position fixed
      top 10px
      right 10px
-
-  .login
-
-
 
   .title
     font-size 28px
