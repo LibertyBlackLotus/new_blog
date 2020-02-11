@@ -5,7 +5,7 @@
       <div class="info">
         <img class="avatar" :src="item.fromAvatar" width="36" height="36"/>
         <div class="right">
-          <div class="name">{{item.user_id}}</div>
+          <div class="name">{{item.User.user_name}}</div>
           <div class="date">{{item.comment_date}}</div>
         </div>
       </div>

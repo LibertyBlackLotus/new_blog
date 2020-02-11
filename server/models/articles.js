@@ -1,21 +1,21 @@
 const db = require('../config/db.js');
 const articles = '../schema/articles.js';
-// const user = '../schema/user.js';
+const user = '../schema/user.js';
 const articleLike = '../schema/article_like.js';
 
 const Article = db.import(articles);
 const ArticleLike = db.import(articleLike);
 
-// const User = db.import(user);
-// User.belongsTo(Article, {
-//   as: 'user',
-//   foreginkey: 'user_id'
-// });
-// Article.belongsTo(User, {
-//   as: 'user',
-//   foreginkey: 'id'
-// });
+const User = db.import(user);
 
+Article.belongsTo(User, {
+	as: 'User',
+	foreignKey: 'user_id'
+});
+User.hasMany(Article, {
+	as: 'Articles',
+	foreignKey: 'user_id'
+});
 
 /**
  *  获取某个用户的全部articles
@@ -44,6 +44,11 @@ const getPublishArticleList = () => {
 		where: {
 			status: 1
 		},
+		include: [{
+			model: User,
+			as: 'User',
+			attributes: ['user_name']
+		}],
 		order: [
 			['article_date', 'DESC']
 		]
@@ -59,7 +64,6 @@ const getPublishArticleList = () => {
  * @returns {boolean}
  */
 const createArticle = (data) => {
-	console.log(' createArticle-->', data);
 	let result;
 	if (data.id) {
 		result = Article.update(
@@ -130,7 +134,12 @@ const readArticle = (article_id) => {
 	let article = Article.findOne({
 		where: {
 			article_id
-		}
+		},
+		include: [{
+			model: User,
+			as: 'User',
+			attributes: ['user_name']
+		}]
 	});
 	return article;
 }

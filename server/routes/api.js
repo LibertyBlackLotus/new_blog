@@ -1,6 +1,7 @@
 const Todolist = require('../controllers/todolist.js');
 const Articles = require('../controllers/articles.js');
 const Comments = require('../controllers/comments.js');
+const User = require('../controllers/user');
 const router = require('koa-router')();
 
 router.get('/todolist/:id', Todolist.getTodolist);
@@ -20,5 +21,8 @@ router.post('/articles/consult', Articles.consultArticle);        //查阅文章
 
 router.get('/comments/list/:id', Comments.getCommentsList);      //获取文章评论列表
 router.post('/comments', Comments.createComment);                 //添加评论
+
+router.post('/uploadAvatar', User.saveAvatar);
+
 
 module.exports = router;

@@ -24,12 +24,12 @@ const getUserById = (id) => {
  * @returns {*}
  */
 const getUserByName = (name) => {
-  const userInfo = User.findOne({
-    where: {
-      user_name: name
-    }
-  });
-  return userInfo;
+	const userInfo = User.findOne({
+		where: {
+			user_name: name
+		}
+	});
+	return userInfo;
 }
 
 /**
@@ -37,17 +37,37 @@ const getUserByName = (name) => {
  * @param data
  */
 const createUser = (data) => {
-  let salt = bcrypt.genSaltSync(10);
-  let password = bcrypt.hashSync(data.password, salt);  //密码加密
-  const userInfo = User.create({
-    user_name: data.name,
-    password
-  });
-  return userInfo;
+	let salt = bcrypt.genSaltSync(10);
+	let password = bcrypt.hashSync(data.password, salt);  //密码加密
+	const userInfo = User.create({
+		user_name: data.name,
+		password
+	});
+	return userInfo;
+}
+
+/**
+ *
+ * @param id 用户id
+ * @param url 头像url
+ */
+const saveUserAvatarUrl = (id, url) => {
+	let result = User.update(
+		{
+			photo: url,
+		},
+		{
+			where: {
+				id
+			}
+		}
+	)
+	return result;
 }
 
 module.exports = {
 	getUserById,
 	getUserByName,
-  createUser
+	createUser,
+	saveUserAvatarUrl
 }

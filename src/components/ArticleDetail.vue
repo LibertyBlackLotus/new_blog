@@ -15,7 +15,7 @@
                 </el-col>
                 <el-col :span="12">
                     <div>
-                        {{article.article_id}}
+                        {{article.User && article.User.user_name}}
                     </div>
                     <div>
                         <span>{{article.article_date}}&nbsp;&nbsp;</span>
