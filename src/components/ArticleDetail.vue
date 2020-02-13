@@ -35,7 +35,7 @@
                     <img src="../assets/heartHover.png" @click="like" class="articleLike"/>
                 </el-col>
                 <el-col :span="4">
-                    {{article.article_like_count}}人点赞
+                    {{article && article.article_like_count}}人点赞
                 </el-col>
             </el-row>
         </el-card>
@@ -111,6 +111,7 @@
 		methods: {
 			//获取文章详情
 			getArticleDetail() {
+				let _this = this;
 				this.$http.get('/api/articles/' + this.id)
 					.then(res => {
 						console.log('getArticleDetail res: ', res);
@@ -121,7 +122,7 @@
 							});
 							return;
 						}
-						this.article = res.data.article;
+						_this.article = res.data;
 					});
 			},
 

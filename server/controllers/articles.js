@@ -73,8 +73,7 @@ const updateArticle = async (ctx) => {
 	let title = data.article_title;
 	let content = data.article_content;
 	let result = await Articles.updateArticle(article_id, title, content);
-	let status = result[0] !== 0;
-	ctx.body = {status};
+	ctx.body = result;
 }
 
 /**
@@ -85,10 +84,7 @@ const updateArticle = async (ctx) => {
 const readArticle = async (ctx) => {
 	let article_id = ctx.params.id;
 	let article = await Articles.readArticle(article_id);
-	ctx.body = {
-		status: true,
-		article
-	};
+	ctx.body = article;
 }
 
 /**
@@ -100,6 +96,7 @@ const publishArticle = async (ctx) => {
 	let data = ctx.request.body;
 	let article_id = data.article_id;
 	let result = await Articles.publishArticle(article_id);
+	console.log('====result====');
 	let status = result[0] !== 0;
 	ctx.body = {status};
 }

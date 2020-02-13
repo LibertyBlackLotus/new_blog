@@ -36,25 +36,6 @@ app.use(async (ctx, next) => {  //JWT 验证处理
 });
 
 app.use(serve(path.join(__dirname, '/public')));
-// app.use(async function (ctx, next) {
-// 	if ('POST' != ctx.method) return await next();
-// 	// 获取图片源
-// 	//  <input type="file" name="file" multiple>
-// 	let data = ctx.request.body;
-// 	let file = data.picBase64;
-// 	console.log('file--->', file);
-// 	// 接收读出流
-// 	const reader = fs.createReadStream(file)
-// 	// 创建写入流
-// 	// 3. 指定图片路径文件名（即上传图片存储目录）
-// 	const stream = fs.createWriteStream(path.join('public/images', file.name))
-// 	// 用管道将读出流 "倒给" 输入流
-// 	reader.pipe(stream)
-// 	// 4.打印上传文件在服器上存储的相对路径
-// 	console.log('uploading %s -> %s', file.name, stream.path)
-// 	// 5.重定向到基于根目录下的静态资源web访问路径，展示图片
-// 	ctx.redirect(stream.path.substr(6).replace(/\\/g,'/'))
-// })
 
 app.on('error', (err, ctx) => {
 	console.log('server error', err);
@@ -62,9 +43,9 @@ app.on('error', (err, ctx) => {
 
 app.use(cors({
 	origin: function (ctx) {
-		if (ctx.url === '/test') {
-			return "*";    // 允许来自所有域名请求
-		}
+		// if (ctx.url === '/test') {
+		// 	return "*";    // 允许来自所有域名请求
+		// }
 		return 'http://localhost:8081'; // 这样就能只允许 http://localhost:8080 这个域名的请求了
 	},
 	exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'],

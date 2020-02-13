@@ -27,6 +27,12 @@ const getArticleList = (user_id) => {
 		where: {
 			user_id
 		},
+		include: [{
+			model: User,
+			as: 'User',
+			attributes: ['user_name']
+		}],
+		// attributes: ['article_id', 'user_id', 'article_title'],
 		order: [
 			['article_date', 'DESC']
 		]

@@ -7,16 +7,20 @@
                     {{item.article_content}}
                 </div>
                 <div class="articleItemInfoContent">
-          <span class="articleItemInfo articleItemInfoUser">
-            {{ item.User.user_name }}
-          </span>
+                      <span class="articleItemInfo articleItemInfoUser">
+                        {{ item.User.user_name }}
+                      </span>
                     <span class="articleItemInfo">
-            <span class="articleItemInfoImg"><img src="../assets/heart.png"/></span>
-            {{ item.article_like_count }}
-          </span>
+                        <span class="articleItemInfoImg">
+                            <img src="../assets/heart.png"/>
+                        </span>
+                          <span>
+                              {{ item.article_like_count }}
+                          </span>
+                      </span>
                     <span class="articleItemInfo">
-            {{ item.article_date }}
-          </span>
+                        {{ item.article_date }}
+                      </span>
                 </div>
             </el-card>
         </el-col>
@@ -30,7 +34,6 @@
 				publishArticleList: [],
 			}
 		},
-
 
 		created: function () {
 			this.getPublishArticleList();  // 获取文章列表
@@ -86,8 +89,10 @@
         margin-left 20px
         font-size 12px
         color #b4b4b4
+
     .articleItemInfoUser
         cursor pointer
+
     .articleItemInfoImg img
         width 10px
 

@@ -57,7 +57,7 @@
               this.$message.error(res.data.info);
               sessionStorage.setItem('my-token', null);
             }
-          }, (err) => {
+          }, () => {
             this.$message.error('请求错误！');
             sessionStorage.setItem('my-token', null);
           })
@@ -68,7 +68,7 @@
 
 <style lang="stylus" scoped>
   .el-row.content
-    background url(../assets/login.png) no-repeat
+    background url(../assets/login.jpg) no-repeat
     background-size 100% 100%
     height 800px
     align-items center
