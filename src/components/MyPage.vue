@@ -3,16 +3,21 @@
         <Header></Header>
         <div class="myInfo">
             <el-row>
-                <el-col :span="4">
-                    <div class="avatar">
-                        <img src="../assets/avatar.png"/>
-                    </div>
-                </el-col>
-                <el-col :span="20">
-                    <el-row>
-                        {{userInfo.user_name}}
-                    </el-row>
-                </el-col>
+                <span class="avatar">
+                    <img :src="userInfo.photo"/>
+                </span>
+                <span class="myName">{{userInfo.user_name}}</span>
+
+                <!--<el-col :span="2">-->
+                    <!--<div class="avatar">-->
+                        <!--<img :src="userInfo.photo"/>-->
+                    <!--</div>-->
+                <!--</el-col>-->
+                <!--<el-col :span="22">-->
+                    <!--&lt;!&ndash;<el-row>&ndash;&gt;-->
+                        <!--<span class="myName">{{userInfo.user_name}}</span>-->
+                    <!--&lt;!&ndash;</el-row>&ndash;&gt;-->
+                <!--</el-col>-->
             </el-row>
         </div>
         <Article></Article>
@@ -63,25 +68,6 @@
 </script>
 
 <style lang="stylus" scoped>
-    .el-header
-        background-color #B3C0D1
-        color #333
-        text-align center
-        background-size 100% 100%
-
-    .el-footer
-        background-color #B3C0D1
-        color #333
-        text-align center
-        line-height 60px
-
-    .el-main
-        background-color #E9EEF3
-        color #333
-        text-align center
-        line-height 160px
-        width 1080px
-        margin 0 auto
     .myInfo
         width 1080px
         margin 0 auto
@@ -90,10 +76,12 @@
     .userInfo
         width 100px
         float right
-    .avatar
-        width 80px
     .avatar img
         width 80px
         border-radius 100%
+    .myName
+        font-size 24pt
+
+
 
 </style>

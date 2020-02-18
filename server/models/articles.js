@@ -2,10 +2,8 @@ const db = require('../config/db.js');
 const articles = '../schema/articles.js';
 const user = '../schema/user.js';
 const articleLike = '../schema/article_like.js';
-
 const Article = db.import(articles);
 const ArticleLike = db.import(articleLike);
-
 const User = db.import(user);
 
 Article.belongsTo(User, {
@@ -30,7 +28,7 @@ const getArticleList = (user_id) => {
 		include: [{
 			model: User,
 			as: 'User',
-			attributes: ['user_name']
+			attributes: ['user_name', 'photo']
 		}],
 		// attributes: ['article_id', 'user_id', 'article_title'],
 		order: [
@@ -53,7 +51,7 @@ const getPublishArticleList = () => {
 		include: [{
 			model: User,
 			as: 'User',
-			attributes: ['user_name']
+			attributes: ['user_name', 'photo']
 		}],
 		order: [
 			['article_date', 'DESC']
@@ -63,7 +61,6 @@ const getPublishArticleList = () => {
 	return articles;
 };
 
-
 /**
  * 创建/保存文章
  * @param data  文章内容
@@ -71,6 +68,7 @@ const getPublishArticleList = () => {
  */
 const createArticle = (data) => {
 	let result;
+	console.log(' model time----->', data.article_date );
 	if (data.id) {
 		result = Article.update(
 			{
@@ -144,7 +142,7 @@ const readArticle = (article_id) => {
 		include: [{
 			model: User,
 			as: 'User',
-			attributes: ['user_name']
+			attributes: ['user_name', 'photo']
 		}]
 	});
 	return article;
@@ -202,6 +200,17 @@ const consultArticle = (article_id) => {
 	}).catch(e => ({status: 'error'}));
 	return result;
 }
+/**
+ * 上传博客图片
+ * @returns {boolean}
+ */
+// const uploadImg = (data) => {
+// 	let result = Article.create({
+// 		...data
+// 	}).then(article => ({status: 'ok', article}))
+// 		.catch(e => ({status: 'error', message: e}));
+// 	return result;
+// }
 
 module.exports = {
 	getArticleList,

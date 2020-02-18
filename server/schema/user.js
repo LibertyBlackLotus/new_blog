@@ -20,20 +20,20 @@ module.exports = function(sequelize, DataTypes) {
     },
     email: {
       type: DataTypes.STRING(30),
-      allowNull: false
+      allowNull: true
     },
     photo: {
       type: DataTypes.STRING(255),
-      allowNull: false
+      allowNull: true
     },
     phone_number: {
       type: DataTypes.INTEGER(11).UNSIGNED,
-      allowNull: false,
+      allowNull: true,
       defaultValue: '0'
     },
     nickname: {
       type: DataTypes.STRING(30),
-      allowNull: false,
+      allowNull: true,
       defaultValue: ''
     },
     register_time: {

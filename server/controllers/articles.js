@@ -28,6 +28,7 @@ const getPublishArticleList = async (ctx) => {
  */
 const createArticle = async (ctx) => {
 	const data = ctx.request.body;
+	console.log(' time--->', data.article_date);
 	const result = await Articles.createArticle(data);
 	if (result.status == 'ok') {
 		ctx.body = {
@@ -96,7 +97,6 @@ const publishArticle = async (ctx) => {
 	let data = ctx.request.body;
 	let article_id = data.article_id;
 	let result = await Articles.publishArticle(article_id);
-	console.log('====result====');
 	let status = result[0] !== 0;
 	ctx.body = {status};
 }
@@ -127,6 +127,18 @@ const consultArticle = async (ctx) => {
 }
 
 
+/**
+ * 上传博客图片
+ * @param ctx
+ * @returns {Promise.<void>}
+ */
+const uploadImg = async (ctx) => {
+	ctx.body = {
+		info: ctx.req.file.filename
+	}
+
+};
+
 module.exports = {
 	getArticleList,
 	getPublishArticleList,
@@ -136,5 +148,6 @@ module.exports = {
 	readArticle,
 	publishArticle,
 	likeArticle,
-	consultArticle
+	consultArticle,
+	uploadImg
 }

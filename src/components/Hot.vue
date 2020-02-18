@@ -2,11 +2,18 @@
     <el-row class="articleList">
         <el-col v-for="(item) in publishArticleList" :key="item.article_id">
             <el-card class="articleItem">
-                <span class="articleItemTitle" @click="toDetail(item.article_id)">{{item.article_title}}</span>
-                <div class="articleItemContent" v-html="item.article_content">
+                <span class="articleItemTitle"
+                      @click="toDetail(item.article_id)">
+                    {{item.article_title}}
+                </span>
+                <div class="articleItemContent"
+                     v-html="item.article_content"  >
                     {{item.article_content}}
                 </div>
                 <div class="articleItemInfoContent">
+                    <span class="articleItemInfo articleItemInfoUser">
+                        <img :src="item.User.photo" />
+                      </span>
                       <span class="articleItemInfo articleItemInfoUser">
                         {{ item.User.user_name }}
                       </span>
@@ -19,7 +26,7 @@
                           </span>
                       </span>
                     <span class="articleItemInfo">
-                        {{ item.article_date }}
+                        {{ item.article_date | dateFormat }}
                       </span>
                 </div>
             </el-card>
@@ -41,7 +48,7 @@
 
 		methods: {
 			getPublishArticleList() {
-				this.$http.get('/api/articles/publish/')
+				this.$http.get('/api/articles/publish')
 					.then((res) => {
 						console.log('getPublishArticleList: ', res);
 						if (res.status == 200) {
@@ -70,20 +77,21 @@
         margin 0 auto
 
     .articleItem
-        margin-top 10px
-
+        margin-top 1px
     .articleItemTitle
         font-size 16px
         font-weight 600
         color #00b4ff
         cursor pointer
+    .articleItemTitle:hover
+        text-decoration underline
 
     .articleItemContent
-        max-height 60px
+        max-height 200px
         overflow hidden
 
     .articleItemInfoContent
-        margin-top 5px
+        margin-top 10px
 
     .articleItemInfo
         margin-left 20px
@@ -92,6 +100,8 @@
 
     .articleItemInfoUser
         cursor pointer
+    .articleItemInfoUser img
+        width 30px
 
     .articleItemInfoImg img
         width 10px

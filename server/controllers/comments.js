@@ -25,7 +25,7 @@ const createComment = async (ctx) => {
 	if (result.status == 'ok') {
 		ctx.body = {
 			status: true,
-			comment: result.comment
+			result
 		}
 	} else {
 		ctx.body = {
@@ -35,7 +35,51 @@ const createComment = async (ctx) => {
 	}
 }
 
+/**
+ *
+ * @param ctx
+ * @returns {Promise.<void>}
+ */
+const praiseComment = async (ctx) => {
+	const data = ctx.request.body;
+	let result = await Comments.praiseComment(data);
+	if (result.status == 'error') {
+		ctx.body = {
+			status: false,
+			message: result.message
+		};
+	} else {
+		ctx.body = {
+			status: true,
+			result
+		}
+	}
+}
+
+/**
+ *
+ * @param ctx
+ * @returns {Promise.<void>}
+ */
+const replyComment = async (ctx) => {
+	const data = ctx.request.body;
+	let result = await Comments.replyComment(data);
+	if (result.status == 'error') {
+		ctx.body = {
+			status: false,
+			message: result.message
+		};
+	} else {
+		ctx.body = {
+			status: true,
+			result
+		}
+	}
+}
+
 module.exports = {
 	getCommentsList,
-	createComment
+	createComment,
+	praiseComment,
+	replyComment
 }

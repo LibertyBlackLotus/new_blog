@@ -16,8 +16,11 @@ const getUserId = () => {
 	return userInfo != null ? userInfo.id : '';
 }
 
+const ImgServer = 'http://localhost:8889/uploads/';
+
 
 module.exports = {
 	getUserInfo,
-	getUserId
+	getUserId,
+	ImgServer
 }

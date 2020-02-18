@@ -1,54 +1,60 @@
 <!-- 文章详情 -->
 <template>
-    <div class="articleDetail">
-        <Header/>
-        <el-card class="content">
-            <!-- 文章标题 -->
-            <el-row class="articleTitle">
-                {{article.article_title}}
-            </el-row>
+    <div>
+        <!-- 头部 -->
+        <Header></Header>
 
-            <!-- 文章信息 -->
-            <el-row class="articleContent">
-                <el-col :span="2" class="articleAvatar">
-                    <img src="../assets/avatar.png"/>
-                </el-col>
-                <el-col :span="12">
-                    <div>
-                        {{article.User && article.User.user_name}}
-                    </div>
-                    <div>
-                        <span>{{article.article_date}}&nbsp;&nbsp;</span>
-                        <span>阅读 {{article.article_views}}</span>
-                    </div>
-                </el-col>
+        <div class="articleDetail">
+            <!-- 文章详情 -->
+            <el-card class="content">
+                <!-- 文章标题 -->
+                <el-row class="articleTitle">
+                    {{article.article_title}}
+                </el-row>
 
-            </el-row>
+                <!-- 文章信息 -->
+                <el-row class="articleContent">
+                    <el-col :span="2" class="articleAvatar">
+                        <img :src="article.User && article.User.photo" />
+                    </el-col>
+                    <el-col :span="12">
+                        <div>
+                            {{article.User && article.User.user_name}}
+                        </div>
+                        <div>
+                            <span>{{article.article_date | dateFormat}}&nbsp;&nbsp;</span>
+                            <span>阅读 {{article.article_views}}</span>
+                        </div>
+                    </el-col>
+                </el-row>
 
-            <!-- 文章内容 -->
-            <div v-html="article.article_content">
-                {{article.article_content}}
-            </div>
+                <!-- 文章内容 -->
+                <div v-html="article.article_content">
+                    {{article.article_content}}
+                </div>
 
-            <el-row>
-                <el-col :span="1">
-                    <img src="../assets/heartHover.png" @click="like" class="articleLike"/>
-                </el-col>
-                <el-col :span="4">
-                    {{article && article.article_like_count}}人点赞
-                </el-col>
-            </el-row>
-        </el-card>
+                <el-row>
+                    <el-col :span="1">
+                        <img src="../assets/heartHover.png" @click="like" class="articleLike"/>
+                    </el-col>
+                    <el-col :span="4">
+                        {{article && article.article_like_count}}人点赞
+                    </el-col>
+                </el-row>
+            </el-card>
 
-        <el-card class="comments">
-            <el-row>评论</el-row>
-            <Comment
-                    :comments="comments"
-                    :commitComment="commitComment">
-            </Comment>
+            <!-- 评论 -->
+            <el-card class="comments">
+                <el-row>评论</el-row>
+                <Comment
+                        :comments="comments"
+                        :commitReply="commitReply"
+                        :getComments="getComments">
+                </Comment>
+            </el-card>
+        </div>
 
-        </el-card>
-
+        <!--  底部添加评论 -->
         <div class="commentsPanel">
             <div class="write-reply" @click="showCommentBox" v-if="!showBox">
                 <el-input placeholder="添加新评论"></el-input>
@@ -56,14 +62,14 @@
             <transition name="fade">
                 <div class="input-wrapper" v-if="showBox">
                     <el-input class="gray-bg-input"
-                              v-model="inputComment"
+                              v-model="inputReply"
                               type="textarea"
                               :rows="3"
                               placeholder="写下你的评论">
                     </el-input>
                     <div class="btn-control">
                         <el-button size="small" @click="cancelCommentInput">取消</el-button>
-                        <el-button size="small" type="danger" @click="commitComment">确定</el-button>
+                        <el-button size="small" type="danger" @click="commitComment(inputReply)">确定</el-button>
                     </div>
                 </div>
             </transition>
@@ -76,7 +82,7 @@
 	import Header from '../components/Header.vue';
 	import Comment from '../components/Comment.vue';
 	import moment from 'moment';
-	import {getUserInfo} from '../utils/common';
+	import {getUserId} from '../utils/common';
 	import ElButton from "../../node_modules/element-ui/packages/button/src/button.vue";
 
 	export default {
@@ -93,9 +99,9 @@
 			return {
 				article: {},
 				comments: [],
-				user_id: getUserInfo() ? getUserInfo().id : '',
-				showBox: false,    //是否显示评论框
-				inputComment: '',   //评论内容
+				user_id: getUserId(),
+				showBox: false,     //是否显示评论框
+				inputReply: '',     //回复内容
 			}
 		},
 
@@ -193,14 +199,13 @@
 			},
 
 			//提交评论
-			commitComment() {
+			commitComment(comment_content = '') {
 				let params = {
 					user_id: this.user_id,
 					article_id: this.id,
-					comment_content: this.inputComment,
+					comment_content,
 					comment_like_count: 0,
-					comment_date: moment().format('YYYY-MM-DD HH:mm:ss'),
-					parent_comment_id: 0
+					comment_date: moment().format('YYYY-MM-DD HH:mm:ss')
 				};
 
 				this.$http.post('/api/comments', params)
@@ -215,10 +220,39 @@
 						}
 						this.$message({
 							type: 'success',
+							message: '评论成功！'
+						});
+						this.inputReply = '';
+						this.getComments();   //获取文章回复列表
+					});
+			},
+
+			//提交回复
+			commitReply(comment_id = 0, content = '', parent_id = 0) {
+				let params = {
+					comment_id,
+                    user_id: getUserId(),
+					content,
+					reply_date: moment().format('YYYY-MM-DD HH:mm:ss'),
+					parent_id
+				};
+
+				this.$http.post('/api/comments/reply', params)
+					.then(res => {
+						console.log('replyComment res: ', res);
+						if (res.status != 200 || !res.data | !res.data.status) {
+							this.$message({
+								type: 'error',
+								message: '提交失败！'
+							});
+							return;
+						}
+						this.$message({
+							type: 'success',
 							message: '回复成功！'
 						});
 						this.showBox = false;
-						this.inputComment = '';
+						this.inputReply = '';
 						this.getComments();   //获取文章回复列表
 					});
 			},
@@ -240,12 +274,11 @@
 
 <style lang="stylus" scoped>
     .articleDetail
-        background linear-gradient(to right, #ffffff, #e5e7e9)
-        padding-bottom 100px
+        width 1080px
+        margin 0 auto
 
     .content
-        width 910px
-        margin 0 auto
+        margin-top 10px
 
     .articleContent
         margin-top 5px
@@ -253,6 +286,7 @@
     .articleTitle
         font-size 25px
         font-weight 700
+        color #00b4ff
 
     .articleAvatar img
         width 50px
@@ -262,8 +296,7 @@
 
     .comments
         width 910px
-        margin 0 auto
-        margin-top 20px
+        margin-top 5px
 
     .commentsPanel
         position fixed

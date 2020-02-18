@@ -31,7 +31,7 @@ module.exports = function(sequelize, DataTypes) {
       defaultValue: '0'
     },
     article_date: {
-      type: DataTypes.DATEONLY,
+      type: DataTypes.DATE,
       allowNull: true
     },
     article_like_count: {

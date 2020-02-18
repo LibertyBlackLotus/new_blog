@@ -1,5 +1,5 @@
 <template>
-  <div class="home">
+  <div>
     <Header></Header>
     <el-row class="content">
       <div class="banner">
@@ -58,9 +58,6 @@
 </script>
 
 <style lang="stylus" scoped>
-  .home
-    background-color #f0ede9
-    padding-bottom 100px
   .el-header
     background-color #B3C0D1
     color #333

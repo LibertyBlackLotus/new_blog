@@ -106,10 +106,10 @@
 				canvas.height = height
 				// 铺底色
 				ctx.fillStyle = '#fff'
-				ctx.fillRect(0, 0, canvas.width, canvas.height)
-				ctx.drawImage(img, 0, 0, width, height)
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+				ctx.drawImage(img, 0, 0, width, height);
 				//进行最小压缩
-				let ndata = canvas.toDataURL('image/jpeg', size)
+				let ndata = canvas.toDataURL('image/jpeg', size);
 				//console.log('*******压缩后的图片大小*******')
 				//console.log(ndata)
 				//console.log(ndata.length / 1024)
@@ -122,7 +122,7 @@
 				let body = {
 					'id': this.userInfo.id,
 					'picBase64': base64
-				}
+				};
 				this.$http.post('/api/uploadAvatar', body).then(res => {
 					console.log(' res-->', res);
 					if (res.status == '200') {

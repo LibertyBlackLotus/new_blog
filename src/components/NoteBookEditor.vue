@@ -8,11 +8,15 @@
                 <el-button type="success" size="small" icon="el-icon-upload" @click="noteBookSaveArticle">
                     保存
                 </el-button>
-                <el-button type="success" size="small" icon="el-icon-s-promotion" @click="noteBookPublishArticle">
+                <el-button v-if="articleId != 0" type="success" size="small" icon="el-icon-s-promotion" @click="noteBookPublishArticle">
                     发布
+                </el-button>
+                <el-button v-if="articleId != 0" type="danger" size="small" @click="noteBookRemoveArticle">
+                    删除
                 </el-button>
             </el-row>
             <quill-editor style="min-height:600px !important;"
+                          ref="myTextEditor"
                           v-model="content"
                           :options="editorOption"
                           @focus="onEditorFocus($event)"
@@ -21,7 +25,7 @@
                 <!-- 自定义toolar -->
                 <div id="toolbar" slot="toolbar">
                     <!-- Add a bold button -->
-                    <el-button class="ql-bold" title="加粗">Bold</el-button>
+                    <button class="ql-bold" title="加粗">Bold</button>
                     <button class="ql-italic" title="斜体">Italic</button>
                     <button class="ql-underline" title="下划线">underline</button>
                     <button class="ql-strike" title="删除线">strike</button>
@@ -33,7 +37,7 @@
                     <button class="ql-list" value="ordered" title="有序列表"></button>
                     <button class="ql-list" value="bullet" title="无序列表"></button>
                     <!-- 插入图片 -->
-                    <button class="ql-image" title="图片" @click="insertImgClick($event)"></button>
+                    <button class="ql-image" title="图片"></button>
                     <!-- Add font size dropdown -->
                     <select class="ql-header" title="段落格式">
                         <option selected>段落</option>
@@ -67,13 +71,19 @@
                     <button class="ql-clean" title="还原"></button>
                     <!-- You can also add your own -->
 
-                    <!-- 选择图片input -->
-                    <!--<input style="display: none;" type="file" id="insert_image" @change="fileInsert($event)">-->
                 </div>
-            </quill-editor>        <!--<el-button type="danger" size="small" @click="noteBookRemoveArticle">-->
-            <!--删除-->
-            <!--</el-button>-->
+            </quill-editor>
         </el-card>
+        <!-- 图片上传组件辅助-->
+        <el-upload
+                class="avatar-uploader"
+                :action="serverUrl"
+                name="img"
+                :show-file-list="false"
+                :on-success="uploadSuccess"
+                :on-error="uploadError"
+                :before-upload="beforeUpload">
+        </el-upload>
     </div>
 
 </template>
@@ -87,6 +97,8 @@
 	import 'quill/dist/quill.snow.css';
 	import 'quill/dist/quill.bubble.css';
 	import '../assets/font.css';
+
+	import {ImgServer} from '../utils/common';
 
 	// 自定义字体大小
 	let Size = Quill.import('attributors/style/size');
@@ -106,7 +118,7 @@
 			saveArticle: Function,    //创建文章
 			updateArticle: Function,  //更新文章
 			publishArticle: Function, //发布文章
-			removeArticle: Function,  //发布文章
+			removeArticle: Function,  //删除文章
 			articleId: Number,         //文章ID
 		},
 		components: {
@@ -115,16 +127,26 @@
 
 		data() {
 			return {
-				article: {},
-				title: '',
-				content: null,
-				saveStatus: '',
+				article: {},      //文章详情对象
+				title: '',        //文章标题
+				content: null,    //文章内容
+				serverUrl: 'http://localhost:8889/api/articles/uploadImg',
+				maxUploadSize: 1024 * 1024 * 1024 * 2,
 				editorOption: {
 					placeholder: "请输入正文",
 					theme: "snow",
 					modules: {
 						toolbar: {
-							container: '#toolbar'
+							container: '#toolbar',
+							handlers: {
+								'image': function (value) {
+									if (value) {
+										document.querySelector('.avatar-uploader input').click();
+									} else {
+										this.quill.format('image', false);
+									}
+								}
+							}
 						}
 					}
 				}
@@ -132,7 +154,7 @@
 		},
 
 		created: function () {
-			if(this.articleId != 0){
+			if(this.articleId != 0){  //id 0 为新建文章
 				this.getArticleDetail();  //获取文章详情
             }
 		},
@@ -165,85 +187,56 @@
 
 			// 准备富文本编辑器
 			onEditorReady(editor) {
-				console.log('onEditorReady----');
 			},
 
 			// 富文本编辑器 失去焦点事件
 			onEditorBlur(editor) {
-				console.log('onEditorBlur----');
 			},
 
 			// 富文本编辑器 获得焦点事件
 			onEditorFocus(editor) {
-				console.log('onEditorFocus----');
 			},
 
 			// 富文本编辑器 内容改变事件
 			onEditorChange({ editor, html, text }) {
 				this.content = html;
+//				this.$emit('input', this.content)
 			},
 
-			insertImgClick() {
-				console.log('insertImgClick----');
+			//富文本图片上传前
+			beforeUpload() {
+				// 显示loading动画
+//				this.quillUpdateImg = true;
 			},
 
-			// 富文本编辑器 点击插入图片或者视频上传并预览
-			fileInsert(e) {
-				var oFile = e.target.files[0];
-				if (typeof (oFile) === 'undefined') {
-					return;
-				}
-				let sExtensionName = oFile.name.substring(oFile.name.lastIndexOf('.') + 1).toLowerCase();   // 文件扩展名
-				let sfileType = ''; // 上传文件类型
-				if (e.target.id == 'insert_image') {
-					sfileType = 'image'
-					if (sExtensionName !== 'png' && sExtensionName !== 'jpg' && sExtensionName !== 'jpeg') {
-						alert('不支持该类型图片');
-						return;
-					}
-				}
-				if (e.target.id == 'insert_video') {
-					sfileType = 'video';
-					if (sExtensionName !== 'mp4' && sExtensionName !== 'avi' && sExtensionName !== 'mov') {
-						alert('不支持该类型视频');
-						return;
-					}
-					let maxSize = 100 * 1024 * 1024;    // 100MB
-					if (oFile.size > maxSize) {
-						alert('上传视频大小不能超过100MB');
-						return;
-					}
-				}
-				var reader = new FileReader();
-				reader.readAsDataURL(oFile);
-				reader.onloadend = () => {
-					let formData = new FormData(); // 通过formdata上传
-					formData.append('file', oFile);
-					let sUrl = '';
-					if (sfileType == 'image') {
-						sUrl = 'Pic';
-					}
-					if (sfileType == 'video') {
-						sUrl = 'Vie';
-					}
-					var url = this.api_config + '/dealerIndex/upload' + sUrl + '.htm';
-					this.axios.post(url, formData, {
-						headers: {'Content-Type': 'multipart/form-data'}
-					}).then((res) => {
-						this.editor.insertEmbed(this.editor.selection.savedRange.index, sfileType, res.data.data);  // 这个方法用来手动插入dom到编辑器里
-						let isAndroid = this.$is_android(); // 判断是ios还是android
-						if (isAndroid) {
-							$('video').removeAttr('controls');
-							$('video').attr('x5-video-player-type', 'h5');
-						}
-						this.editor.setSelection(this.editor.selection.savedRange.index + 1);  // 这个方法可以获取光标位置
-					}).catch((response) => {
-						console.log('失败', response);
-					})
-				}
+            //图片上传成功
+			uploadSuccess(res, file) {
+				// res为图片服务器返回的数据
+				// 获取富文本组件实例
+				let quill = this.$refs.myTextEditor.quill;
+				// 如果上传成功
+//				if (res.code === '200' && res.info != null) {
+					// 获取光标所在位置
+					let length = quill.getSelection().index;
+					// 插入图片  res.info为服务器返回的图片地址
+					quill.insertEmbed(length, 'image', ImgServer + res.info);
+					// 调整光标到最后
+					quill.setSelection(length + 1)
+//				} else {
+//					this.$message.error('图片插入失败')
+//				}
+				// loading动画消失
+//				this.quillUpdateImg = false
 			},
 
-			// 保存/创建文章
+			// 富文本图片上传失败
+			uploadError() {
+				// loading动画消失
+				this.quillUpdateImg = false
+				this.$message.error('图片插入失败')
+			},
+
+			// 更新/创建文章
 			noteBookSaveArticle() {
                 if(this.articleId == 0){ 	//创建
 					let data = {
@@ -251,7 +244,7 @@
 						content: this.content
 					};
 					this.saveArticle(data);
-				}else{//更新
+				}else{  //更新
 					let data = {
 						id: this.articleId,
 						title: this.title,
@@ -261,10 +254,11 @@
                 }
 			},
 
-//			noteBookRemoveArticle() {
-//				let data = {article_id: this.article.article_id};
-//				this.removeArticle(data);
-//			},
+            //删除文章
+			noteBookRemoveArticle() {
+				let data = {article_id: this.articleId};
+				this.removeArticle(data);
+			},
 
 			//发布文章
 			noteBookPublishArticle() {

@@ -44,7 +44,7 @@ const createUser = (data) => {
 		password
 	});
 	return userInfo;
-}
+};
 
 /**
  *
@@ -61,9 +61,9 @@ const saveUserAvatarUrl = (id, url) => {
 				id
 			}
 		}
-	)
+	);
 	return result;
-}
+};
 
 module.exports = {
 	getUserById,
