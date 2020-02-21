@@ -1,7 +1,9 @@
+<!-- 最热文章 -->
 <template>
     <el-row class="articleList">
         <el-col v-for="(item) in publishArticleList" :key="item.article_id">
             <el-card class="articleItem">
+                <el-tag effect="dark" type="danger">hot</el-tag>
                 <span class="articleItemTitle"
                       @click="toDetail(item.article_id)">
                     {{item.article_title}}
@@ -11,10 +13,12 @@
                     {{item.article_content}}
                 </div>
                 <div class="articleItemInfoContent">
-                    <span class="articleItemInfo articleItemInfoUser">
+                    <span class="articleItemInfo articleItemInfoUser"
+                          @click="toUserMainPage(item.User.id)">
                         <img :src="item.User.photo" />
                       </span>
-                      <span class="articleItemInfo articleItemInfoUser">
+                      <span class="articleItemInfo articleItemInfoUser"
+                            @click="toUserMainPage(item.User.id)">
                         {{ item.User.user_name }}
                       </span>
                     <span class="articleItemInfo">
@@ -48,7 +52,7 @@
 
 		methods: {
 			getPublishArticleList() {
-				this.$http.get('/api/articles/publish')
+				this.$http.get('/api/articles/hot')
 					.then((res) => {
 						console.log('getPublishArticleList: ', res);
 						if (res.status == 200) {
@@ -64,7 +68,16 @@
 					params: {id}
 				});
 				window.open(href, '_blank');
-			}
+			},
+
+			//跳转至用户主页
+			toUserMainPage(id) {
+				const {href} = this.$router.resolve({
+					name: 'mypage',
+					params: {id}
+				});
+				window.open(href, '_blank');
+			},
 
 		}
 
@@ -72,10 +85,6 @@
 </script>
 
 <style lang="stylus" scoped>
-    .articleList
-        width 1080px
-        margin 0 auto
-
     .articleItem
         margin-top 1px
     .articleItemTitle

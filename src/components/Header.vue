@@ -4,7 +4,16 @@
             <img src="../assets/logo1.png" @click="toHome" alt="昆朋"/>
             <span>昆朋</span>
         </el-col>
-        <el-col :span="4" :offset="14" v-if="userInfo" class="userInfo">
+        <el-col :span="4">
+            <el-input
+                    placeholder="请输入搜索内容"
+                    prefix-icon="el-icon-search"
+                    size="midium"
+                    @keyup.enter.native="searchItem"
+                    v-model="keywords">
+            </el-input>
+        </el-col>
+        <el-col :span="4" :offset="10" v-if="userInfo" class="userInfo">
             <el-row>
                 <el-dropdown @command="handleCommand">
                       <span class="el-dropdown-link">
@@ -31,23 +40,25 @@
 </template>
 
 <script>
+    import {getUserInfo} from '../utils/common';
 	export default {
 		data() {
 			return {
-				userInfo: null,
+				userInfo: getUserInfo(), //用户信息
+				keywords: '',            //搜索关键字
 			}
 		},
 
-		created: function () {
-			this.userInfo = this.getUserInfo();
-		},
-
 		methods: {
-			//获取用户信息
-			getUserInfo() {
-				let userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
-				return userInfo != null ? userInfo : '';
-			},
+            //搜索
+			searchItem(){
+				let keywords = this.keywords;
+				let {href} = this.$router.resolve({
+					name: 'searchResult',
+					params: {keywords}
+				});
+				window.open(href, '_blank');
+            },
 
 			handleCommand(command) {
 				switch (command) {
@@ -67,7 +78,11 @@
 
 			//跳转至我的页
 			toMyPage() {
-				this.$router.push('/mypage');
+				const {href} = this.$router.resolve({
+					name: 'mypage',
+					params: {id: this.userInfo.id}
+				});
+				window.open(href, '_blank');
 			},
 
 			//跳转至设置
@@ -77,7 +92,7 @@
 
 			//登出
 			logout() {
-				sessionStorage.setItem('my-token', null);
+				sessionStorage.setItem('myToken', null);
 				sessionStorage.setItem('userInfo', null);
 				this.toLogin();
 			},
@@ -109,6 +124,10 @@
         line-height 60px !important
         border-bottom 1px solid #f1f1f1
         background #ffffff
+        position fixed
+        width 100%
+        top 0
+        z-index 10000
 
     .logo img
         height 40px

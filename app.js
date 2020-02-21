@@ -16,21 +16,20 @@ app.use(bodyParser());
 app.use(json());
 app.use(logger());
 app.use(async (ctx, next) => {  //JWT 验证处理
-  try{
-    await next();
-  }catch(err){
-    console.log('err: ', err);
-    if(401 == err.status){
-      ctx.status = 401;
-      ctx.body = {
-        success: false,
-        token: null,
-        info: 'Protected resource, use Authorization header to get access'
-      };
-    }else{
-      throw err;
-    }
-  }
+	try {
+		await next();
+	} catch (err) {
+		if (401 == err.status) {
+			ctx.status = 401;
+			ctx.body = {
+				success: false,
+				token: null,
+				info: 'Protected resource, use Authorization header to get access'
+			};
+		} else {
+			throw err;
+		}
+	}
 });
 
 app.use(serve(path.join(__dirname, '/public')));
@@ -41,21 +40,18 @@ app.on('error', (err, ctx) => {
 
 app.use(cors({
 	origin: function (ctx) {
-		// if (ctx.url === '/test') {
-		// 	return "*";    // 允许来自所有域名请求
-		// }
 		return 'http://localhost:8081'; // 这样就能只允许 http://localhost:8080 这个域名的请求了
 	},
 	exposeHeaders: ['WWW-Authenticate', 'Server-Authorization'],
 	maxAge: 5,
 	credentials: true,
-	allowMethods: ['GET', 'POST', 'DELETE'],
+	allowMethods: ['GET', 'POST', 'DELETE', 'PUT'],
 	allowHeaders: ['Content-Type', 'Authorization', 'Accept'],
 }));
 
 router.use('/auth', auth.routes());
-// router.use('/api', jwt({secret: 'lin'}), api.routes()); //jwt token验证
-router.use('/api', api.routes());
+router.use('/api', jwt({secret: 'lin'}), api.routes()); //jwt token验证
+// router.use('/api', api.routes());
 
 app.use(router.routes());
 app.use(historyApiFallback());        // 处理刷新页面404,一定要加在静态文件的serve之前，否则会失效。

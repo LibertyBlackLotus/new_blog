@@ -1,6 +1,7 @@
 <!--评论组件-->
 <template>
     <div class="container">
+        <el-tag>{{comments.length}} 条评论</el-tag>
         <div class="comment" v-for="item in comments" :key="item.id">
             <div class="info">
                 <img class="avatar" :src="item.User && item.User.photo" width="36" height="36"/>

@@ -25,9 +25,9 @@
 
 
 <script>
-	import Header from '../components/Header.vue';
-	import SettingsBasic from '../components/SettingsBasic.vue';
-	import SettingsPersonal from '../components/SettingsPersonal.vue';
+	import Header from './Header.vue';
+	import SettingsBasic from './SettingsBasic.vue';
+	import SettingsPersonal from './SettingsPersonal.vue';
 
 	export default {
 		components: {

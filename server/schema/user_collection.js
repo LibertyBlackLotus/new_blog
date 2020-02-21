@@ -1,9 +1,9 @@
 /* jshint indent: 2 */
 
 module.exports = function (sequelize, DataTypes) {
-	return sequelize.define('category', {
+	return sequelize.define('user_collection', {
 		id: {
-			type: DataTypes.INTEGER(10),
+			type: DataTypes.INTEGER(10).UNSIGNED,
 			allowNull: false,
 			primaryKey: true,
 			autoIncrement: true
@@ -12,19 +12,15 @@ module.exports = function (sequelize, DataTypes) {
 			type: DataTypes.INTEGER(10).UNSIGNED,
 			allowNull: false
 		},
-		cate_name: {
-			type: DataTypes.STRING(50),
-			allowNull: false
-		},
-		cate_description: {
-			type: DataTypes.TEXT,
-			allowNull: false
-		},
-		partent_cate_id: {
+		user_id: {
 			type: DataTypes.INTEGER(10).UNSIGNED,
+			allowNull: false
+		},
+		time: {
+			type: DataTypes.DATE,
 			allowNull: false
 		}
 	}, {
-		tableName: 'category'
+		tableName: 'user_collection'
 	});
 };

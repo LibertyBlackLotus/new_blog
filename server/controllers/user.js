@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const fs = require('fs');
 const path = require('path');
-const formidable = require('koa-formidable');
+const moment = require('moment');
 
 /**
  * 获取用户信息
@@ -12,12 +12,10 @@ const formidable = require('koa-formidable');
  * @returns {Promise.<void>}
  */
 const getUserInfo = async (ctx) => {
-	const id = ctx.params.id;    // 获取url里传过来的参数里的id
+	const id = ctx.params.id;
 	const result = await User.getUserById(id);
-	ctx.body = {
-		result
-	};         // 将请求的结果放到response的body里返回
-}
+	ctx.body = result;
+};
 
 /**
  * 创建用户
@@ -29,8 +27,9 @@ const createUser = async (ctx) => {
 	let userInfo = await User.createUser(data);
 	const userToken = {
 		name: userInfo.user_name,
-		id: userInfo.id
-	}
+		id: userInfo.id,
+		time: moment().format('YYYY-MM-DD HH:mm:ss')
+	};
 	const secret = 'lin';
 	const token = jwt.sign(userToken, secret); //签名
 	ctx.body = {
@@ -38,7 +37,7 @@ const createUser = async (ctx) => {
 		token,     //返回token
 		userInfo,  //用户信息
 	}
-}
+};
 
 /**
  * 用户验证
@@ -57,8 +56,9 @@ const postUserAuth = async (ctx) => {
 		} else {
 			const userToken = {
 				name: userInfo.user_name,
-				id: userInfo.id
-			}
+				id: userInfo.id,
+				time: moment().format('YYYY-MM-DD HH:mm:ss')
+			};
 			const secret = 'lin';
 			const token = jwt.sign(userToken, secret); //签名
 			ctx.body = {
@@ -73,7 +73,7 @@ const postUserAuth = async (ctx) => {
 			info: '用户不存在!'
 		}
 	}
-}
+};
 
 /**
  * 保存用户头像
@@ -102,7 +102,7 @@ const saveAvatar = async (ctx) => {
 }
 
 module.exports = {
-	getUserInfo,   // 把获取用户信息
+	getUserInfo,   // 获取用户信息
 	postUserAuth,
 	createUser,
 	saveAvatar

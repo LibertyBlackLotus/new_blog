@@ -54,7 +54,6 @@
 
 		methods: {
 			menuSelected(index){
-				console.log('menuSelected-->', index );
 				this.actived = index;
 			    this.articleId = parseInt(this.actived);
 				this.reFresh = false;
@@ -100,12 +99,10 @@
 					article_comment_count: 0,
 					article_like_count: 0,
 				};
-				//console.log( 'params: ', params );
-                let _this = this;
 				this.$http.post('/api/articles', params)
 					.then(res => {
 						console.log('saveArticle res: ', res);
-						_this.articleId = res.data.article.article_id;
+						this.articleId = res.data.article.article_id;
 						if (res.status != 200 || !res.data || !res.data.status) {
 							this.$message({
 								type: 'error',
@@ -128,8 +125,7 @@
 				};
 				this.$http.put('/api/articles/publish', params)
 					.then(res => {
-						console.log('publishArticle res: ', res);
-						if (res.status != 200 || !res.data) {
+						if (res.status != 200) {
 							this.$message({
 								type: 'error',
 								message: '发布失败！'
@@ -142,11 +138,10 @@
 						});
 						this.getArticleList();  //获取文章列表
 					}).catch(e => {
-					console.log('error: ', e.message);
-					this.$message({
-						type: 'error',
-						message: '发布失败！'
-					});
+                        this.$message({
+                            type: 'error',
+                            message: '发布失败！'
+                        });
 				});
 			},
 

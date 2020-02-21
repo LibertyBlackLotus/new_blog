@@ -30,7 +30,7 @@ const getUserByName = (name) => {
 		}
 	});
 	return userInfo;
-}
+};
 
 /**
  * 创建用户
@@ -41,7 +41,8 @@ const createUser = (data) => {
 	let password = bcrypt.hashSync(data.password, salt);  //密码加密
 	const userInfo = User.create({
 		user_name: data.name,
-		password
+		password,
+		register_time: data.register_time
 	});
 	return userInfo;
 };

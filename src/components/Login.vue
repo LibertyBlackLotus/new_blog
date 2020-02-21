@@ -46,7 +46,7 @@
         this.$http.post('/auth/userAuth', obj)
           .then((res) => {
             if (res.data.success) {
-              sessionStorage.setItem('my-token', res.data.token);
+              sessionStorage.setItem('myToken', res.data.token);
               sessionStorage.setItem('userInfo', JSON.stringify(res.data.userInfo));
               this.$message({
                 type: 'success',
@@ -55,11 +55,11 @@
               this.$router.push('/home');
             } else {
               this.$message.error(res.data.info);
-              sessionStorage.setItem('my-token', null);
+              sessionStorage.setItem('myToken', null);
             }
           }, () => {
             this.$message.error('请求错误！');
-            sessionStorage.setItem('my-token', null);
+            sessionStorage.setItem('myToken', null);
           })
       }
     }

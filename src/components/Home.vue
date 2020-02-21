@@ -1,95 +1,83 @@
 <template>
-  <div>
-    <Header></Header>
-    <el-row class="content">
-      <div class="banner">
-        <!--<el-carousel height="300px">-->
-          <!--<el-carousel-item v-for="item in bannerList" :key="item.id">-->
-            <!--<img :src="item.image" class="bannerImg"/>-->
-          <!--</el-carousel-item>-->
-        <!--</el-carousel>-->
-      </div>
-      <Hot></Hot>
-    </el-row>
-  </div>
+    <div>
+        <Header></Header>
+        <div class="banner">
+            <el-carousel>
+                <el-carousel-item v-for="item in bannerList" :key="item.id">
+                    <img :src="item.image" class="bannerImg"/>
+                </el-carousel-item>
+            </el-carousel>
+        </div>
+        <el-row class="homeContent">
+            <el-col :span="17">
+                <el-tabs class="tabsContent"
+                         v-model="activeName"
+                         @tab-click="handleTabClick">
+                    <el-tab-pane v-for="item in tabList"
+                                 :key="item.id"
+                                 :label="item.tabItem"
+                                 :name="item.name" >
+                        <keep-alive>
+                            <component v-bind:is="item.component" :userId="userId"></component>
+                        </keep-alive>
+                    </el-tab-pane>
+                </el-tabs>
+            </el-col>
+            <el-col :span="6" :offset="1">
+                <Recommend :userId="userId"></Recommend>
+            </el-col>
+        </el-row>
+    </div>
 </template>
 
 <script>
-  import Header from '../components/Header.vue';
-  import Hot from '../components/Hot.vue';
+	import Header from './Header.vue';
+	import Hot from './Hot.vue';
+	import Latest from './Latest.vue';
+	import Focus from './Focus.vue';
+	import Recommend from './Recommend.vue';
+	import {getUserId} from '../utils/common';
 
-  export default{
-    components: {
-      Header, Hot
-    },
+	export default {
+		components: {
+			Header,
+			Hot,
+			Latest,
+			Focus,
+			Recommend
+		},
 
-    data(){
-      return{
-        activeIndex: '1',
-        activeName: 'hot',
-        navList: [
-          {path: '/home', navItem: '首页'},
-          {path: '/hot', navItem: '最热'},
-        ],
-        tabList: [
-          {name: 'hot', tabItem: '最热', component:  Hot}
-        ]
-      }
-    },
+		data() {
+			return {
+				activeIndex: '1',
+				activeName: 'hot',
+                userId: getUserId(),
+				bannerList: [
+					{id: 1, image: require('../assets/banner1.jpg')}
+                ],
+				tabList: [
+					{id: 1, name: 'hot', tabItem: '最热', component: Hot},
+					{id: 2, name: 'latest', tabItem: '最新', component: Latest},
+					{id: 3, name: 'focus', tabItem: '关注', component: Focus},
+				]
+			}
+		},
 
-    methods: {
-      handleSelect(key, keyPath) {
-        console.log(key, keyPath);
-      },
-
-      handleTabClick(tab, event) {
-        console.log(tab, event);
-      },
-
-      toLogin(){
-        this.$router.push('/');
-      },
-
-      toMyPage(){
-        this.$router.push('/mypage');
-      }
-    },
-  }
+		methods: {
+			//点击tab
+			handleTabClick(tab, event) {
+//				console.log(tab, event);
+			},
+		},
+	}
 </script>
 
 <style lang="stylus" scoped>
-  .el-header
-    background-color #B3C0D1
-    color #333
-    text-align center
-    height 450px !important
-    background-size 100% 100%
-  .banner
-  .bannerImg
-    width 100%
+    .homeContent
+        width 1080px
+        margin 0 auto
+    .bannerImg
+        width 100%
 
-  .content
-    padding 0 50px
-    margin 0 auto
-  .contentTabs
-    width 1080px
-
-  .el-footer
-    background-color #B3C0D1
-    color #333
-    text-align center
-    line-height 60px
-
-  .el-main
-    background-color #E9EEF3
-    color #333
-    text-align center
-    line-height 160px
-    width 1080px
-    margin 0 auto
-
-  .userInfo
-    width 100px
-    float right
 
 </style>

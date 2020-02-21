@@ -124,7 +124,6 @@
 					'picBase64': base64
 				};
 				this.$http.post('/api/uploadAvatar', body).then(res => {
-					console.log(' res-->', res);
 					if (res.status == '200') {
 						this.notify('更换成功！');
 						let userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
