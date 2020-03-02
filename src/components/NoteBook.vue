@@ -1,21 +1,26 @@
 <template>
     <div>
-        <el-row>
-            <el-col :span="4" class="nodeList">
-                <el-menu @select="menuSelected"
-                         :default-active="actived">
-                    <el-menu-item index="0">
+        <Row>
+            <i-col span="4" class="nodeList">
+                <Menu @on-select="menuSelected"
+                         :active-name="actived" >
+                    <MenuItem name="0">
                         <span>新建文章</span>
                         <i class="el-icon-edit"></i>
-                    </el-menu-item>
-                    <el-menu-item v-for="(item, i) in articleList"
+                    </MenuItem>
+                    <MenuItem v-for="(item, i) in articleList"
                                   :key="i"
-                                  :index="'' + item.article_id">
+                                  :name="'' + item.article_id"
+                                  >
                         {{ item.article_title }}
-                    </el-menu-item>
-                </el-menu>
-            </el-col>
-            <el-col :span="20">
+                        <Tag :color="item.status == 1? 'success': 'default'"
+                             style="position: absolute; right: 0px; opacity: 0.7;">
+                            {{item.status == 1? '已发布': '草稿'}}
+                        </Tag>
+                    </MenuItem>
+                </Menu>
+            </i-col>
+            <i-col span="20">
                 <Editor v-if="reFresh"
                         :saveArticle="saveArticle"
                         :updateArticle="updateArticle"
@@ -23,8 +28,8 @@
                         :removeArticle="removeArticle"
                         :articleId="articleId">
                 </Editor>
-            </el-col>
-        </el-row>
+            </i-col>
+        </Row>
     </div>
 </template>
 
@@ -53,9 +58,9 @@
 		},
 
 		methods: {
-			menuSelected(index){
-				this.actived = index;
-			    this.articleId = parseInt(this.actived);
+			menuSelected(name) {
+				this.actived = name;
+				this.articleId = parseInt(this.actived);
 				this.reFresh = false;
 				this.$nextTick(() => {
 					this.reFresh = true;
@@ -75,20 +80,18 @@
 
 			//新建/保存文章
 			saveArticle(data) {
-				if(data.title == 0){
-					this.$message({
-						type: 'warning',
-						message: '请填写文章标题！'
+				if (data.title == 0) {
+					this.$Message.warning({
+						content: '请填写文章标题！'
 					});
 					return;
 				}
-				if(data.content == null){
-					this.$message({
-						type: 'warning',
-						message: '请填写文章内容！'
+				if (data.content == null) {
+					this.$Message.warning({
+						content: '请填写文章内容！'
 					});
 					return;
-                }
+				}
 				let params = {
 					user_id: this.userId,
 					article_title: data.title,
@@ -101,19 +104,13 @@
 				};
 				this.$http.post('/api/articles', params)
 					.then(res => {
-						console.log('saveArticle res: ', res);
 						this.articleId = res.data.article.article_id;
 						if (res.status != 200 || !res.data || !res.data.status) {
-							this.$message({
-								type: 'error',
-								message: '保存失败！'
+							this.$Message.error({
+								content: '保存失败！'
 							});
 							return;
 						}
-						this.$message({
-							type: 'success',
-							message: '保存成功！'
-						});
 						this.getArticleList();  //获取文章列表
 					});
 			},
@@ -126,22 +123,19 @@
 				this.$http.put('/api/articles/publish', params)
 					.then(res => {
 						if (res.status != 200) {
-							this.$message({
-								type: 'error',
-								message: '发布失败！'
+							this.$Message.error({
+								content: '发布失败！'
 							});
 							return;
 						}
-						this.$message({
-							type: 'success',
-							message: '发布成功！'
+						this.$Message.success({
+							content: '发布成功！'
 						});
 						this.getArticleList();  //获取文章列表
 					}).catch(e => {
-                        this.$message({
-                            type: 'error',
-                            message: '发布失败！'
-                        });
+					this.$Message.error({
+						content: '发布失败！'
+					});
 				});
 			},
 
@@ -149,18 +143,16 @@
 			removeArticle(data) {
 				this.$http.delete('/api/articles', {data: data})
 					.then(res => {
-						console.log('saveArticle res: ', res);
 						if (res.status != 200 || !res.data || !res.data.status) {
-							this.$message({
-								type: 'error',
-								message: '删除失败！'
+							this.$Message.error({
+								content: '删除失败！'
 							});
 							return;
 						}
-						this.$message({
-							type: 'success',
-							message: '删除成功！'
+						this.$Message.success({
+							content: '删除成功！'
 						});
+						this.actived = '0';
 						this.getArticleList();  //获取文章列表
 					});
 			},
@@ -175,16 +167,11 @@
 				this.$http.put('/api/articles', params)
 					.then(res => {
 						if (res.status != 200 || !res.data) {
-							this.$message({
-								type: 'error',
-								message: '保存失败！'
+							this.$Message.error({
+								content: '保存失败！'
 							});
 							return;
 						}
-						this.$message({
-							type: 'success',
-							message: '保存成功！'
-						});
 						this.getArticleList();  //获取文章列表
 					});
 			}
@@ -196,11 +183,13 @@
     .nodeList
         z-index 10000
         background-color #fff
+
     .nodeListRow
-        width 150px !important
+        width 200px !important
         margin-top 5px
+
     .el-menu-item
-        border-bottom  1px solid #f1f1f1
+        border-bottom 1px solid #409EFF
         overflow hidden
 
 </style>

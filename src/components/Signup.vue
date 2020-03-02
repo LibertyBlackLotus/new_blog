@@ -1,30 +1,29 @@
 <template>
-    <el-row class="content">
-        <el-col :xs="24" :sm="{span: 6, offset: 9}">
+    <Row class="content">
+        <i-col :xs="24" :sm="{span: 6, offset: 9}">
             <span class="title">
                 欢迎注册
             </span>
-            <el-row>
-                <el-input
+            <Row>
+                <Input class="el-input"
                         v-model="account"
                         placeholder="用户名"
-                        type="text">
-                </el-input>
-                <el-input
+                        type="text" />
+                <Input
                         v-model="password"
                         placeholder="密码"
                         type="password"
-                        @keyup.enter.native="signup">
-                </el-input>
-                <el-button type="primary" @click="signup">注册</el-button>
-            </el-row>
-            <el-button type="success" @click="toLogin">登录</el-button>
-        </el-col>
-    </el-row>
+                        @keyup.enter.native="signup" />
+                <Button type="primary" @click="signupMethod">注册</Button>
+            </Row>
+            <Button type="success" @click="toLogin">登录</Button>
+        </i-col>
+    </Row>
 </template>
 
 <script>
     import moment from 'moment';
+	import {mapState, mapActions} from 'vuex';
 
 	export default {
 		data() {
@@ -34,31 +33,30 @@
 			}
 		},
 		methods: {
+			...mapActions([
+				'signup'     //注册
+			]),
+
 			//注册
-			signup() {
+			signupMethod() {
 				let obj = {
 					name: this.account,
 					password: this.password,
                     register_time: moment().format('YYYY-MM-DD HH:mm:ss')
 				};
-				this.$http.post('/auth/user', obj)
-					.then(res => {
-						if (res.data.success) {
+				this.signup(obj).then( res => {
+					if (res.data.success) {
 							sessionStorage.setItem('myToken', res.data.token);
 							sessionStorage.setItem('userInfo', JSON.stringify(res.data.userInfo));
-							this.$message({
-								type: 'success',
-								message: '注册成功！'
+							this.$Message.success({
+								content: '注册成功！'
 							});
 							this.$router.push('/home');
 						} else {
-							this.$message.error(res.data.info);
+							this.$Message.error(res.data.info);
 							sessionStorage.setItem('myToken', null);
 						}
-					}, () => {
-						this.$message.error('请求错误！');
-						sessionStorage.setItem('myToken', null);
-					})
+                });
 			},
 
 			toLogin(){
@@ -69,7 +67,7 @@
 </script>
 
 <style lang="stylus" scoped>
-    .el-row.content
+    .content
         padding 16px
 
     .title

@@ -51,7 +51,6 @@ const removeFocus = async (ctx) => {
 const checkFocus = async (ctx) => {
 	let data = ctx.request.body;
 	let result = await UserFriends.checkFocus(data);
-	console.log('---result--->', result);
 	if(result == null){
 		ctx.body = false;
 	}else{

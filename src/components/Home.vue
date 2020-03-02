@@ -1,42 +1,64 @@
 <template>
     <div>
+        <BackToTop></BackToTop>
         <Header></Header>
-        <div class="banner">
-            <el-carousel>
-                <el-carousel-item v-for="item in bannerList" :key="item.id">
-                    <img :src="item.image" class="bannerImg"/>
-                </el-carousel-item>
-            </el-carousel>
-        </div>
-        <el-row class="homeContent">
-            <el-col :span="17">
-                <el-tabs class="tabsContent"
-                         v-model="activeName"
-                         @tab-click="handleTabClick">
-                    <el-tab-pane v-for="item in tabList"
+        <!--<div class="banner">-->
+            <!--<el-carousel>-->
+                <!--<el-carousel-item v-for="item in bannerList" :key="item.id">-->
+                    <!--<img :src="item.image" class="bannerImg"/>-->
+                <!--</el-carousel-item>-->
+            <!--</el-carousel>-->
+        <!--</div>-->
+        <Row class="homeContent">
+            <i-col span="16">
+                <Tabs class="tabsContent"
+                         v-model="activeName" >
+                    <TabPane v-for="item in tabList"
                                  :key="item.id"
                                  :label="item.tabItem"
                                  :name="item.name" >
                         <keep-alive>
                             <component v-bind:is="item.component" :userId="userId"></component>
                         </keep-alive>
-                    </el-tab-pane>
-                </el-tabs>
-            </el-col>
-            <el-col :span="6" :offset="1">
+                    </TabPane>
+                </Tabs>
+            </i-col>
+            <i-col span="7" offset="1">
                 <Recommend :userId="userId"></Recommend>
-            </el-col>
-        </el-row>
+            </i-col>
+        </Row>
+
+        <Footer></Footer>
     </div>
 </template>
 
 <script>
-	import Header from './Header.vue';
-	import Hot from './Hot.vue';
-	import Latest from './Latest.vue';
-	import Focus from './Focus.vue';
-	import Recommend from './Recommend.vue';
-	import {getUserId} from '../utils/common';
+	import Vue from 'vue';
+    import {getUserId} from '../utils/common';
+	const Header = () => import('./Header.vue');
+	const Footer = () => import('./Footer.vue');
+	const Hot = () => import('./Hot.vue');
+
+	const Latest = Vue.component('Latest', function (resolve) {
+		setTimeout(function () {
+			require(['./Latest.vue'], resolve)
+		}, 1000);
+	});
+	const BackToTop = Vue.component('BackToTop', function (resolve) {
+		setTimeout(function () {
+			require(['./BackToTop.vue'], resolve)
+		}, 1000);
+	});
+	const Focus = Vue.component('Focus', function (resolve) {
+		setTimeout(function () {
+			require(['./Focus.vue'], resolve)
+		}, 1000);
+	});
+	const Recommend = Vue.component('Recommend', function (resolve) {
+		setTimeout(function () {
+			require(['./Recommend.vue'], resolve)
+		}, 1000);
+	});
 
 	export default {
 		components: {
@@ -44,7 +66,8 @@
 			Hot,
 			Latest,
 			Focus,
-			Recommend
+			Recommend,
+			Footer
 		},
 
 		data() {
@@ -53,7 +76,7 @@
 				activeName: 'hot',
                 userId: getUserId(),
 				bannerList: [
-					{id: 1, image: require('../assets/banner1.jpg')}
+//					{id: 1, image: require('../assets/banner1.jpg')}
                 ],
 				tabList: [
 					{id: 1, name: 'hot', tabItem: '最热', component: Hot},

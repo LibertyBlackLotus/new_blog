@@ -3,11 +3,13 @@ const comments = '../schema/comments.js';
 const comments_reply = '../schema/comments_reply.js';
 const user = '../schema/user.js';
 const comments_like = '../schema/comments_like';
+const articles = '../schema/articles';
 
 const Comments = db.import(comments);
 const CommentsReply = db.import(comments_reply);
 const User = db.import(user);
 const CommentsLike = db.import(comments_like);
+const Articles = db.import(articles);
 
 Comments.belongsTo(User, {
 	as: 'User',
@@ -29,7 +31,7 @@ Comments.hasMany(CommentsReply, {
 
 /**
  * 获取文章评论列表
- * @param article_id
+ * @param article_id 文章id
  * @returns {Promise<Model[]> | Promise.<Array.<Model>>}
  */
 const getCommentsList = (article_id) => {
@@ -46,8 +48,7 @@ const getCommentsList = (article_id) => {
 			attributes: ['user_name', 'photo']
 		}, {
 			model: CommentsReply,
-			as: 'replys',
-			order: [[CommentsReply, 'id', 'DESC']]
+			as: 'replys'
 		}]
 	});
 	return result;
@@ -61,8 +62,16 @@ const getCommentsList = (article_id) => {
 const createComment = (data) => {
 	let comment = Comments.create({
 		...data
-	}).then(comment => ({status: 'ok', comment}))
-		.catch(e => ({status: 'error', message: e}));
+	}).then(comment => {
+		return comment? Articles.findOne({
+			where: {
+				article_id: comment.article_id
+			}
+		}).then(article => {
+			article.increment('article_comment_count');
+			return getCommentsList(comment.article_id);
+		}):	null;
+	}).catch(e => ({status: 'error', message: e}));
 	return comment;
 }
 
@@ -72,16 +81,21 @@ const createComment = (data) => {
  * @returns {Promise.<T>|Q.Promise<{status: string}>}
  */
 const praiseComment = (data) => {
+	console.log('praiseComment----model--->', data);
 	let {comment_id, user_id} = data;
 	let result = CommentsLike.create(
 		{
 			comment_id, user_id
 		}
 	).then(like => {
-		return Comments.findOne({where: {id: comment_id}})
-			.then(comment => {
-				return comment.increment('comment_like_count')
-			});
+		console.log('praiseComment----model--like->', like);
+		return Comments.findOne({
+			where: {
+				id: data.comment_id
+			}
+		}).then(comment => {
+			return comment.increment('comment_like_count');
+		});
 	})
 		.catch(e => ({status: 'error'}));
 	return result;

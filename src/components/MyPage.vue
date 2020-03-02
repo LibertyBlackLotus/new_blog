@@ -1,46 +1,48 @@
 <template>
     <div>
+        <BackToTop></BackToTop>
         <Header></Header>
         <div class="myInfo">
-            <el-row>
+            <Row>
                 <span class="avatar">
-                    <img :src="userInfo.photo" />
+                    <img :src="userInfo.photo? userInfo.photo: require('../assets/avatar.png')" />
                 </span>
                 <span class="myName">{{userInfo.user_name}}</span>
-                <el-button type="primary"
-                           size="small"
-                           v-if="!isFocus"
-                           @click="focusUser">
-                    关注
-                </el-button>
-
-                <el-button type="danger"
-                           size="small"
-                           v-if="isFocus"
-                           @click="removeFocus">
-                    已关注
-                </el-button>
-            </el-row>
+                <span v-if="userId != id">
+                    <Button type="primary"
+                               size="small"
+                               v-if="!isFocus"
+                               @click="focusUser">
+                         关注
+                    </Button>
+                    <Button type="success"
+                               size="small"
+                               v-if="isFocus"
+                               @click="removeFocus">
+                        已关注
+                    </Button>
+                </span>
+            </Row>
         </div>
         <div class="myPageContent">
-            <el-row>
-                <el-col :span="17">
-                    <el-tabs class="tabsContent"
+            <Row>
+                <i-col span="17">
+                    <Tabs class="tabsContent"
                              v-model="activeName" >
-                        <el-tab-pane v-for="item in myPageTabsList"
+                        <TabPane v-for="item in myPageTabsList"
                                      :key="item.id"
                                      :label="item.tabItem"
                                      :name="item.name" >
                             <keep-alive>
                                 <component v-bind:is="item.component" :userId="id"></component>
                             </keep-alive>
-                        </el-tab-pane>
-                    </el-tabs>
-                </el-col>
-                <el-col :span="6" :offset="1">
+                        </TabPane>
+                    </Tabs>
+                </i-col>
+                <i-col span="6" offset="1">
                     <ReadRecord :userId="id"></ReadRecord>
-                </el-col>
-            </el-row>
+                </i-col>
+            </Row>
         </div>
 
     </div>
@@ -52,7 +54,9 @@
 	import Collection from './UserCollection.vue';
 	import ReadRecord from './ReadRecord.vue';
 	import moment from 'moment';
+	import {mapState, mapActions} from 'vuex';
 	import {getUserId} from '../utils/common';
+	import BackToTop from './BackToTop.vue';
 
 	export default {
 		props: {
@@ -63,16 +67,16 @@
 			Header,
             Article,
 			Collection,
-			ReadRecord
+			ReadRecord,
+			BackToTop
 		},
 
 		data() {
 			return {
 				activeIndex: '1',
 				activeName: 'article',
-				imageSave: '../assets/avatar.png',
-				userInfo: {},
                 isFocus: false,
+				userId: getUserId(),    //登录用户id
 				myPageTabsList: [
 					{id: 1, name: 'article', tabItem: '文章', component: Article},
 					{id: 2, name: 'collection', tabItem: '收藏', component: Collection}
@@ -80,21 +84,21 @@
 			}
 		},
 
+		computed: {
+			...mapState({
+				userInfo: state => state.user.userInfo  //个人主页用户信息
+			})
+		},
+
         mounted: function(){
-            this.getUserInfo();  //获取用户信息
-            this.checkFocus();   //检测是否关注
+            this.getUserInfo({id: this.id});  //获取个人主页用户信息
+            this.checkFocus();                //检测是否关注
         },
 
 		methods: {
-        	//获取用户信息
-            getUserInfo(){
-				this.$http.get('/auth/user/' + this.id)
-					.then((res) => {
-						if (res.status == 200) {
-							this.userInfo = res.data;
-						}
-					});
-            },
+			...mapActions([
+				'getUserInfo',  //获取用户信息
+			]),
 
             //关注用户
 			focusUser(){
@@ -106,9 +110,8 @@
 				this.$http.post('/api/friends', data)
 					.then((res) => {
 						if (res.status == 200) {
-							this.$message({
-								type: 'success',
-								message: '关注成功！'
+							this.$Message.success({
+								content: '关注成功！'
 							});
 							this.isFocus = true;
 						}
@@ -124,9 +127,8 @@
 				this.$http.delete('/api/friends/removeFocus', {data: data})
 					.then((res) => {
 						if (res.status == 200) {
-							this.$message({
-								type: 'success',
-								message: '已取消关注！'
+							this.$Message.info({
+								content: '已取消关注！'
 							});
 							this.isFocus = false;
 						}
@@ -141,7 +143,6 @@
 				};
 				this.$http.post('/api/friends/checkFocus', data)
 					.then((res) => {
-                        console.log('checkFocus-->', res);
 						if (res.status == 200) {
                             this.isFocus = res.data;
 						}

@@ -1,13 +1,19 @@
 <!-- 用户收藏的文章 -->
 <template>
-    <el-row class="articleList">
-        <el-tag>共收藏 {{userCollectionList.length}} 篇文章</el-tag>
-        <el-col v-for="(item) in userCollectionList" :key="item.id">
-            <el-card class="articleItem">
+    <Row class="articleList">
+        <Tag>共收藏 {{userCollectionList.length}} 篇文章</Tag>
+        <i-col v-for="(item) in userCollectionList" :key="item.id">
+            <Card class="articleItem">
                 <span class="articleItemTitle"
-                      @click="toDetail(item.article_id)">
+                      @click="toDetail(item.article_id, item.article.article_title)">
                     {{item.article && item.article.article_title}}
+
                 </span>
+                <Tag color="gold"
+                     style="float: right;">
+                    收藏于<Time :time="item.time"/>&nbsp;&nbsp;
+                    {{item.time | dateFormat}}
+                </Tag>
                 <div class="articleItemContent"
                      v-html="item.article && item.article.article_content">
                     {{item.article && item.article_content}}
@@ -26,102 +32,73 @@
                           <span>
                               {{ item.article && item.article.article_like_count }}
                           </span>
-                        <span class="articleItemInfo">
+                        <Tag class="articleItemInfo">
                             {{ item.article && item.article.article_date | dateFormat }}
-                        </span>
+                        </Tag>
                     </span>
-                    <el-button type="text" size="small" @click="removeCollection(item)">取消收藏</el-button>
+                    <Button type="text" size="small" @click="removeCollection({id: item.id})">取消收藏</Button>
                 </div>
-            </el-card>
-        </el-col>
-    </el-row>
+            </Card>
+        </i-col>
+    </Row>
 </template>
 
 <script>
+	import {mapState, mapActions} from 'vuex';
+	import {openBlank} from '../utils/common';
+
 	export default {
 		props: {
 			userId: [Number, String]  //个人主页用户id
 		},
 
-		data() {
-			return {
-				userCollectionList: [],  //收藏列表
-			}
+		computed: {
+			...mapState({
+				userCollectionList: state => state.article.userCollectionList  //用户收藏列表
+			})
 		},
 
-		created: function () {
-			this.getUserCollectionList();   //获取用户收藏列表
+		mounted: function () {
+			this.getUserCollectionList({id: this.userId});   //获取用户收藏列表
 		},
 
 		methods: {
-			//获取用户收藏列表
-			getUserCollectionList() {
-				this.$http.get('/api/collection/user/' + this.userId)
-					.then((res) => {
-						console.log('getUserCollectionList: ', res);
-						if (res.status == 200) {
-							this.userCollectionList = res.data;
-						}
-					});
-			},
-
-            //取消收藏
-            removeCollection(item){
-				this.$http.delete('/api/collection/' + item.id)
-					.then((res) => {
-						if (res.status == 200) {
-							this.getUserCollectionList();
-						}
-					});
-            },
+			...mapActions([
+				'getUserCollectionList',  //获取用户收藏列表
+				'removeCollection'        //取消收藏
+			]),
 
 			//跳转至详情
-			toDetail(id) {
-				const {href} = this.$router.resolve({
-					name: 'article_detail',
-					params: {id}
-				});
-				window.open(href, '_blank');
+			toDetail(id, title) {
+				openBlank(this.$router, 'article_detail', {id, title});
 			}
-
 		}
-
 	}
 </script>
 
 <style lang="stylus" scoped>
-    .articleList
-
-        .articleItem
-            margin-top 1px
-
-        .articleItemTitle
-            font-size 16px
-            font-weight 600
-            color #00b4ff
-            cursor pointer
-        .articleItemTitle:hover
-            text-decoration underline
-
-        .articleItemContent
-            max-height 200px
-            overflow hidden
-
-        .articleItemInfoContent
-            margin-top 10px
-
-        .articleItemInfo
-            margin-left 20px
-            font-size 12px
-            color #b4b4b4
-
-        .articleItemInfoUser
-            cursor pointer
-
-        .articleItemInfoUser img
-            width 30px
-
-        .articleItemInfoImg img
-            width 10px
-
+    .articleItem
+        margin-top 1px
+    .articleItemTitle
+        font-size 16px
+        font-weight 600
+        color #00b4ff
+        cursor pointer
+    .articleItemTitle:hover
+        text-decoration underline
+    .articleItemContent
+        max-height 200px
+        overflow hidden
+    .articleItemInfoContent
+        margin-top 10px
+    .articleItemInfo
+        margin-left 20px
+        font-size 12px
+        color #b4b4b4
+    .articleItemInfoUser
+        cursor pointer
+    .articleItemInfoUser img
+        width 30px
+    .articleItemInfoImg img
+        width 10px
 </style>

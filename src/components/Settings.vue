@@ -2,23 +2,26 @@
     <div>
         <Header></Header>
 
-        <el-row class="tac settings">
-            <el-col :span="4">
-                <el-menu @select="menuSelected"
-                         :default-active="actived">
-                    <el-menu-item v-for="(item, i) in navList" :key="i" :index="item.name">
+        <Row class="settings">
+            <i-col span="4">
+                <Menu @select="menuSelected"
+                      width="auto"
+                         :active-name="actived">
+                    <MenuItem v-for="(item, i) in navList"
+                                  :key="i"
+                                  :name="item.name">
                         {{ item.navItem }}
-                    </el-menu-item>
-                </el-menu>
-            </el-col>
+                    </MenuItem>
+                </Menu>
+            </i-col>
 
-            <el-col :span="20">
+            <i-col span="20">
                 <keep-alive>
                     <component :is="currentComponent"></component>
                 </keep-alive>
-            </el-col>
+            </i-col>
 
-        </el-row>
+        </Row>
 
     </div>
 </template>
@@ -42,7 +45,7 @@
 				actived: 'SettingsBasic',
 				navList: [
 					{name: 'SettingsBasic', navItem: '基础设置'},
-					{name: 'SettingsPersonal', navItem: '个人资料'}
+//					{name: 'SettingsPersonal', navItem: '个人资料'}
 				]
 			}
 		},

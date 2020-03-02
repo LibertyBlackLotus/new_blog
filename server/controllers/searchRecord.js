@@ -49,7 +49,6 @@ const getUserSearchRecord = async (ctx) => {
  * @returns {Promise.<void>}
  */
 const removeRecord = async (ctx) => {
-	// let data = ctx.request.body;
 	let record_id = ctx.params.record_id;
 	let result = await SearchRecord.removeRecord(record_id);
 	ctx.body = result;

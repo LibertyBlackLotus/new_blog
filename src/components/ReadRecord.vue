@@ -1,34 +1,44 @@
 <!-- 阅读记录 -->
 <template>
-    <div>
-        <el-button @click="clearReadRecord"
+    <div v-if="readRecords.length > 0">
+        <Button @click="clearReadRecord"
                    type="text"
                    size="small">
             清空
-        </el-button>
-        <el-table
-                :data="readRecords"
-                @row-click="rowClick"
-                style="width: 100%">
-            <el-table-column
-                    fixed
-                    prop="article.article_title"
-                    label="阅读记录"
-                    width="150">
-            </el-table-column>
-            <el-table-column
-                    fixed="right"
-                    label="操作"
-                    width="100">
-                <template slot-scope="scope">
-                    <el-button @click="deleteRecord(scope.row)"
-                               type="text"
-                               size="small">
-                        删除
-                    </el-button>
+        </Button>
+
+        <List header="阅读记录">
+            <ListItem v-for="item in readRecords" :key="item.id">
+                {{item.article && item.article.article_title}}
+                <template slot="action">
+                    <Button type="error" @click="deleteRecord(item)">删除</Button>
                 </template>
-            </el-table-column>
-        </el-table>
+            </ListItem>
+        </List>
+        <!--<el-table-->
+                <!--:data="readRecords"-->
+                <!--@row-click="rowClick"-->
+                <!--style="width: 100%">-->
+            <!--<el-table-column-->
+                    <!--fixed-->
+                    <!--prop="article.article_title"-->
+                    <!--label="阅读记录"-->
+                    <!--width="150">-->
+            <!--</el-table-column>-->
+            <!--<el-table-column-->
+                    <!--fixed="right"-->
+                    <!--label="操作"-->
+                    <!--width="100">-->
+                <!--<template slot-scope="scope">-->
+                    <!--<Button @click="deleteRecord(scope.row)"-->
+                               <!--type="text"-->
+                               <!--size="small">-->
+                        <!--删除-->
+                    <!--</Button>-->
+                <!--</template>-->
+            <!--</el-table-column>-->
+        <!--</el-table>-->
+
     </div>
 </template>
 

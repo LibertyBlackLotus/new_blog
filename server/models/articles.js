@@ -105,7 +105,7 @@ const getFocusArticleList = (id) => {
 		return Article.findAll({
 			where: {
 				user_id: {
-					[Op.or] : friendsId
+					[Op.or]: friendsId
 				}
 			},
 			include: [{
@@ -201,7 +201,7 @@ const readArticle = (article_id) => {
 		include: [{
 			model: User,
 			as: 'User',
-			attributes: ['user_name', 'photo']
+			attributes: ['id', 'user_name', 'photo']
 		}]
 	});
 	return article;
@@ -311,7 +311,7 @@ const search = (keywords) => {
 					article_title: {
 						[Op.like]: `%${keywords}%`
 					}
-				},{
+				}, {
 					article_content: {
 						[Op.like]: `%${keywords}%`
 					}
@@ -335,7 +335,7 @@ const search = (keywords) => {
 const recommend = (id) => {
 	let result = SearchRecord.findOne({
 		where: {
-			 user_id: id
+			user_id: id
 		},
 		attributes: ['content'],
 		order: [
@@ -343,14 +343,14 @@ const recommend = (id) => {
 		],
 		raw: true
 	}).then(records => {
-		return Article.findAll({
+		return records ? Article.findAll({
 			where: {
 				[Op.or]: [
 					{
 						article_title: {
 							[Op.like]: `%${records.content}%`
 						}
-					},{
+					}, {
 						article_content: {
 							[Op.like]: `%${records.content}%`
 						}
@@ -365,7 +365,8 @@ const recommend = (id) => {
 			order: [
 				['article_date', 'DESC']
 			]
-		})
+		}) :
+		[]
 	});
 	return result;
 };

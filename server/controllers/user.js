@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const fs = require('fs');
 const path = require('path');
 const moment = require('moment');
+const {SERVER_URL, SERVER_API_PORT} = require('../config/server');
 
 /**
  * 获取用户信息
@@ -81,7 +82,6 @@ const postUserAuth = async (ctx) => {
  * @returns {Promise.<void>}
  */
 const saveAvatar = async (ctx) => {
-	// try {
 	let data = ctx.request.body;
 	let base64Data = data.picBase64;
 	let base64DataImg = base64Data.replace(/^data:image\/\w+;base64,/, "");
@@ -90,16 +90,13 @@ const saveAvatar = async (ctx) => {
 	let result = "fail";
 	fs.writeFileSync(path.join('public/uploads', avatarName + '.png'), dataBuffer);
 	// console.log('--saveResult--->', saveResult);
-	let pathUrl = 'http://localhost:8889/uploads/' + avatarName + '.png';
+	let pathUrl = `${SERVER_URL}:${SERVER_API_PORT}/uploads/` + avatarName + '.png';
 	const userInfo = await User.saveUserAvatarUrl(data.id, pathUrl); //头像地址入库
 	ctx.body = {
 		success: true,
 		url: pathUrl
 	};
-	// } catch (ex) {
-	// 	res.send(ex);
-	// }
-}
+};
 
 module.exports = {
 	getUserInfo,   // 获取用户信息

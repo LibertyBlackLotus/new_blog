@@ -5,12 +5,21 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="icon" href="<%= BASE_URL %>logo.png">
+
     <title>昆朋</title>
   </head>
-  <body style="background-color: #f0ede9; margin: 0; background：linear-gradient(to right, #ffffff, #e5e7e9);padding-bottom: 100px;padding-top: 60px;">
+  <body style="background-color: #f0ede9; margin: 0; background：linear-gradient(to right, #ffffff, #e5e7e9);">
     <noscript>
       <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
+    <!-- 以下三个ok 打包时引入，并在webpack externals中排除 -->
+    <script src="https://cdn.bootcss.com/vue/2.6.11/vue.common.dev.js"></script>
+    <script src="https://cdn.bootcss.com/axios/0.19.2/axios.js"></script>
+    <script src="https://cdn.bootcss.com/iview/3.5.4/iview.js"></script>
+
+    <!--<script src="https://cdn.bootcss.com/vue-router/3.1.3/vue-router.common.js"></script>-->
+    <!--<script src="https://cdn.bootcss.com/vuex/3.1.2/vuex.esm.browser.js"></script>-->
+
     <div id="app"></div>
     <!-- built files will be auto injected -->
   </body>

@@ -3,12 +3,12 @@
     <div>
         <Header></Header>
         <div class="articleList">
-            <el-tag>{{seachResult.length}}个结果</el-tag>
-            <el-row class="articleList">
+            <Tag style="width: 100%;">{{searchResult.length}}个结果</Tag>
+            <Row class="articleList">
                 <!-- 搜索结果 -->
-                <el-col :span="18">
-                    <el-card class="articleItem"
-                             v-for="item in seachResult"
+                <i-col span="18">
+                    <Card class="articleItem"
+                             v-for="item in searchResult"
                              :key="item.article_id">
                         <!-- 作者 -->
                         <div class="articleItemInfoContent">
@@ -26,13 +26,13 @@
                                 {{ item.article_like_count }}
                             </span>
                         </span>
-                            <span class="articleItemInfo">
+                            <Tag class="articleItemInfo">
                             {{ item.article_date | dateFormat }}
-                        </span>
+                        </Tag>
                         </div>
                         <!-- 标题 -->
                         <span class="articleItemTitle"
-                              @click="toDetail(item.article_id)">
+                              @click="toDetail(item.article_id, item.article_title)">
                         {{item.article_title}}
                     </span>
                         <!-- 内容 -->
@@ -40,14 +40,14 @@
                              v-html="item.article_content">
                             {{item.article_content}}
                         </div>
-                    </el-card>
-                </el-col>
+                    </Card>
+                </i-col>
 
                 <!-- 最近搜索 -->
-                <el-col :span="6">
+                <i-col span="6">
                     <RecentSearch :userId="userId"></RecentSearch>
-                </el-col>
-            </el-row>
+                </i-col>
+            </Row>
         </div>
     </div>
 </template>
@@ -56,7 +56,8 @@
 	import Header from './Header.vue';
 	import RecentSearch from './RecentSearch.vue';
 	import moment from 'moment';
-	import {getUserId} from '../utils/common';
+	import {getUserId, openBlank} from '../utils/common';
+	import {mapState, mapActions} from 'vuex';
 
 	export default {
 		props: {
@@ -70,57 +71,41 @@
 
 		data() {
 			return {
-				seachResult: [],    //搜索结果
-				seachRecord: [],    //搜索记录
-                userId: getUserId() //用户id
+                userId: getUserId()  //用户id
 			}
 		},
 
-		created: function () {
-			this.saveSearchRecord(); //记录搜索内容
-			this.getSearchItem();    //获取搜索结果
+        computed: {
+            ...mapState({
+				searchResult: state => state.article.searchResult,       //搜索结果
+            })
+        },
+
+		created () {
+			this.saveSearchRecordMethod();                  //记录搜索内容
+			this.getSearchItem({keywords: this.keywords});  //获取搜索结果
 		},
 
 		methods: {
+            ...mapActions([
+                'getSearchItem',   //获取搜索结果
+                'saveSearchRecord' //记录搜索内容
+            ]),
+
 			//记录搜索内容
-            saveSearchRecord(){
+            saveSearchRecordMethod(){
                 let params = {
                     user_id: this.userId,
                     content: this.keywords,
                     time: moment().format('YYYY-MM-DD HH:mm:ss'),
                 };
-				this.$http.post('/api/record/searchRecord', params)
-					.then((res) => {
-						console.log('saveSearchRecord: ', res);
-						if (res.status == 200) {
-							this.seachRecord = res.data;
-						}
-					});
+                console.log('--saveSearchRecordMethod-->', params );
+                this.saveSearchRecord(params);
             },
 
-			//获取搜索结果
-			getSearchItem() {
-				this.$http.get('/api/articles/search/' + this.keywords)
-					.then((res) => {
-						console.log('getSearchItem: ', res);
-						if (res.status == 200) {
-							this.seachResult = res.data;
-						} else {
-							this.$message({
-								type: 'error',
-								message: '获取搜索结果失败！'
-							});
-						}
-					});
-			},
-
 			//跳转至详情
-			toDetail(id) {
-				const {href} = this.$router.resolve({
-					name: 'article_detail',
-					params: {id}
-				});
-				window.open(href, '_blank');
+			toDetail(id, title) {
+				openBlank(this.$router, 'article_detail', {id, title});
 			}
 		}
 	}
@@ -137,6 +122,7 @@
         font-weight 600
         color #00b4ff
         cursor pointer
+        margin-top 5px
     .articleItemTitle:hover
         text-decoration underline
     .articleItemContent

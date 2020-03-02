@@ -1,12 +1,12 @@
 <!-- 推荐阅读 -->
 <template>
-    <el-row class="articleList">
-        <el-tag>推荐阅读</el-tag>
-        <el-col v-for="(item) in recommendList" :key="item.article_id">
-            <el-card class="articleItem">
-                <!--<el-tag effect="dark" type="info">推荐</el-tag>-->
+    <div class="articleList" v-if="recommendList.length > 0">
+        <Tag style="width: 100%;">推荐阅读</Tag>
+        <Row v-for="item in recommendList"
+             :key="item.article_id">
+            <Card class="articleItem">
                 <span class="articleItemTitle"
-                      @click="toDetail(item.article_id)">
+                      @click="toDetail(item.article_id, item.article_title)">
                     {{item.article_title}}
                 </span>
                 <div class="articleItemContent"
@@ -34,15 +34,16 @@
                         {{ item.article_date | dateFormatDay }}
                       </span>
                 </div>
-            </el-card>
-        </el-col>
-    </el-row>
+            </Card>
+        </Row>
+    </div>
 </template>
 
 <script>
+    import {openBlank} from '../utils/common';
 	export default {
 		props: {
-		    userId: Number //用户id
+		    userId: [Number, String] //用户id
         },
 
 		data() {
@@ -68,12 +69,8 @@
 			},
 
 			//跳转至详情
-			toDetail(id) {
-				const {href} = this.$router.resolve({
-					name: 'article_detail',
-					params: {id}
-				});
-				window.open(href, '_blank');
+			toDetail(id, title) {
+				openBlank(this.$router, 'article_detail', {id, title});
 			},
 
 			//跳转至用户主页
@@ -103,7 +100,7 @@
         text-decoration underline
 
     .articleItemContent
-        max-height 200px
+        max-height 50px
         overflow hidden
 
     .articleItemInfoContent

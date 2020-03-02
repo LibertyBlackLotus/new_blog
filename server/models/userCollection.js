@@ -60,12 +60,36 @@ const getUserCollection = (user_id) => {
  * @returns {*}
  */
 const removeCollection = (id) => {
-	let result = UserCollection.destroy({
+	let result = UserCollection.findOne({
 		where: {
 			id
-		}
-	}).then(result => ({status: 'ok'}))
-		.catch(e => ({status: 'error', message: e}));
+		},
+		attributes: ['user_id'],
+		raw: true
+	}).then(user => {
+		return UserCollection.destroy({
+			where: {
+				id
+			}
+		}).then(result => {
+			return UserCollection.findAll({
+				where: {
+					user_id: user.user_id
+				},
+				include: [{
+					model: Articles,
+					as: 'article'
+				},{
+					model: User,
+					as: 'User',
+					attributes: ['id', 'user_name', 'photo']
+				}],
+				order: [
+					['time', 'DESC']
+				]
+			});
+		}).catch(e => ({status: 'error', message: e}));
+	});
 	return result;
 };
 
@@ -86,7 +110,7 @@ const removeCollectionAll = (user_id) => {
 
 
 /**
- * 判断用户是否喜欢文章
+ * 判断用户是否收藏文章
  * @param data.article_id 文章id
  * @param data.user_id 收藏用户id
  * @returns {Promise<[number , Model[]]> | Promise.<Array.<number, number>>}

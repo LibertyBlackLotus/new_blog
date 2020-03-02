@@ -1,10 +1,10 @@
 <template>
-    <el-row class="articleList">
-        <el-tag>共{{userArticleList.length}} 篇文章</el-tag>
-        <el-col v-for="(item) in userArticleList" :key="item.article_id">
-            <el-card class="articleItem">
+    <Row class="articleList">
+        <Tag>共{{userArticleList.length}} 篇文章</Tag>
+        <i-col v-for="(item) in userArticleList" :key="item.article_id">
+            <Card class="articleItem">
                 <span class="articleItemTitle"
-                      @click="toDetail(item.article_id)">
+                      @click="toDetail(item.article_id, item.article_title)">
                     {{item.article_title}}
                 </span>
                 <div class="articleItemContent"
@@ -13,7 +13,7 @@
                 </div>
                 <div class="articleItemInfoContent">
                     <span class="articleItemInfo articleItemInfoUser">
-                        <img :src="item.User.photo"/>
+                        <img :src="item.User.photo? item.User.photo: require('../assets/avatar.png')"/>
                       </span>
                     <span class="articleItemInfo articleItemInfoUser">
                         {{ item.User.user_name }}
@@ -26,16 +26,21 @@
                               {{ item.article_like_count }}
                           </span>
                       </span>
-                    <span class="articleItemInfo">
+                    <Tag color="blue" class="articleItemInfo">
+                        发表于<Time :time="item.article_date"/>
                         {{ item.article_date | dateFormat }}
+                      </Tag>
+                    <span class="articleItemInfo">
+                        共{{ item.article_comment_count }}条评论
                       </span>
                 </div>
-            </el-card>
-        </el-col>
-    </el-row>
+            </Card>
+        </i-col>
+    </Row>
 </template>
 
 <script>
+    import {openBlank} from '../utils/common';
 	export default {
 		props: {
 			userId: [Number, String]  //个人主页用户id
@@ -64,12 +69,8 @@
 			},
 
 			//跳转至详情
-			toDetail(id) {
-				const {href} = this.$router.resolve({
-					name: 'article_detail',
-					params: {id}
-				});
-				window.open(href, '_blank');
+			toDetail(id, title) {
+				openBlank(this.$router, 'article_detail', {id, title});
 			}
 
 		}

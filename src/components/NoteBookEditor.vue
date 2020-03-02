@@ -1,27 +1,43 @@
 <template>
     <div>
-        <el-card style="min-height:700px;">
-            <el-row class="noteTitle">
-                <el-input v-model="title" placeholder="请输入标题" class="noteTitleInput"></el-input>
-            </el-row>
-            <el-row>
-                <el-button type="success" size="small" icon="el-icon-upload" @click="noteBookSaveArticle">
+        <BackToTop></BackToTop>
+        <Card style="min-height:700px;">
+            <Row class="noteTitle">
+                <Input v-model="title"
+                       autofocus
+                       clearable
+                       prefix="ios-brush"
+                       placeholder="请输入标题"
+                       class="noteTitleInput" />
+            </Row>
+            <Row class="editorButtons">
+                <Button type="success"
+                        icon="ios-cloudy"
+                        @click="noteBookSaveArticle">
                     保存
-                </el-button>
-                <el-button v-if="articleId != 0" type="success" size="small" icon="el-icon-s-promotion" @click="noteBookPublishArticle">
+                </Button>
+                <Button v-if="articleId != 0"
+                        type="info"
+                        icon="md-cloud-upload"
+                        @click="noteBookPublishArticle">
                     发布
-                </el-button>
-                <el-button v-if="articleId != 0" type="danger" size="small" @click="noteBookRemoveArticle">
+                </Button>
+                <Button v-if="articleId != 0"
+                        type="error"
+                        icon="md-trash"
+                        @click="noteBookRemoveArticle">
                     删除
-                </el-button>
-            </el-row>
+                </Button>
+                <Tag>{{editStatus}}</Tag>
+            </Row>
             <quill-editor style="min-height:600px !important;"
                           ref="myTextEditor"
                           v-model="content"
                           :options="editorOption"
                           @focus="onEditorFocus($event)"
                           @blur="onEditorBlur($event)"
-                          @change="onEditorChange($event)">
+                          @change="onEditorChange($event)"
+                          @keydown.s.native.prevent="noteBookSaveArticle">
                 <!-- 自定义toolar -->
                 <div id="toolbar" slot="toolbar">
                     <!-- Add a bold button -->
@@ -73,17 +89,16 @@
 
                 </div>
             </quill-editor>
-        </el-card>
+        </Card>
         <!-- 图片上传组件辅助-->
-        <el-upload
+        <Upload
                 class="avatar-uploader"
                 :action="serverUrl"
                 name="img"
-                :show-file-list="false"
+                :show-upload-list="false"
                 :on-success="uploadSuccess"
-                :on-error="uploadError"
-                :before-upload="beforeUpload">
-        </el-upload>
+                :on-error="uploadError" >
+        </Upload>
     </div>
 
 </template>
@@ -97,8 +112,8 @@
 	import 'quill/dist/quill.snow.css';
 	import 'quill/dist/quill.bubble.css';
 	import '../assets/font.css';
-
-	import {ImgServer} from '../utils/common';
+	import {SERVER_URL, SERVER_API_PORT} from '../api/config';
+	import BackToTop from './BackToTop.vue';
 
 	// 自定义字体大小
 	let Size = Quill.import('attributors/style/size');
@@ -122,7 +137,8 @@
 			articleId: Number,         //文章ID
 		},
 		components: {
-			quillEditor
+			quillEditor,
+			BackToTop
 		},
 
 		data() {
@@ -130,7 +146,10 @@
 				article: {},      //文章详情对象
 				title: '',        //文章标题
 				content: null,    //文章内容
-				serverUrl: 'http://localhost:8889/api/articles/uploadImg',
+                saveInterval: null,
+				editStatus: '编辑中...',
+				serverUrl: `${SERVER_URL}:${SERVER_API_PORT}/api/articles/uploadImg`,
+				ImgServer: `${SERVER_URL}:${SERVER_API_PORT}/uploads/`,
 				maxUploadSize: 1024 * 1024 * 1024 * 2,
 				editorOption: {
 					placeholder: "请输入正文",
@@ -153,11 +172,17 @@
 			}
 		},
 
-		created: function () {
-			if(this.articleId != 0){  //id 0 为新建文章
+		created(){
+			if(this.articleId != 0){      //id 0 为新建文章
 				this.getArticleDetail();  //获取文章详情
             }
 		},
+
+        destroyed(){
+            if(this.saveInterval){
+            	clearInterval(this.saveInterval);
+            }
+        },
 
 		methods: {
 			//填充内容
@@ -173,7 +198,6 @@
 				let _this = this;
 				this.$http.get('/api/articles/' + this.articleId)
 					.then((res) => {
-						console.log('getArticleDetail: ', res);
 						if (res.status == 200) {
 							this.article = res.data;
 							_this.setContent();
@@ -181,32 +205,24 @@
 					});
 			},
 
-			tabClick(tab) {
-				console.log('tabClick: ', tab);
-			},
+			onEditorFocus(){
+				this.editStatus = '编辑中...';
+            },
 
-			// 准备富文本编辑器
-			onEditorReady(editor) {
-			},
-
-			// 富文本编辑器 失去焦点事件
-			onEditorBlur(editor) {
-			},
-
-			// 富文本编辑器 获得焦点事件
-			onEditorFocus(editor) {
-			},
+			onEditorBlur(){
+				if(this.saveInterval){
+					clearInterval(this.saveInterval);
+				}
+            },
 
 			// 富文本编辑器 内容改变事件
 			onEditorChange({ editor, html, text }) {
 				this.content = html;
-//				this.$emit('input', this.content)
-			},
-
-			//富文本图片上传前
-			beforeUpload() {
-				// 显示loading动画
-//				this.quillUpdateImg = true;
+				if(!this.saveInterval){
+					this.saveInterval = setInterval(() => {   //每过10秒自动保存
+						this.noteBookSaveArticle();
+					}, 10 * 1000);
+                }
 			},
 
             //图片上传成功
@@ -219,11 +235,11 @@
 					// 获取光标所在位置
 					let length = quill.getSelection().index;
 					// 插入图片  res.info为服务器返回的图片地址
-					quill.insertEmbed(length, 'image', ImgServer + res.info);
+					quill.insertEmbed(length, 'image', this.ImgServer + res.info);
 					// 调整光标到最后
 					quill.setSelection(length + 1)
 //				} else {
-//					this.$message.error('图片插入失败')
+//					this.$Message.error('图片插入失败')
 //				}
 				// loading动画消失
 //				this.quillUpdateImg = false
@@ -233,11 +249,12 @@
 			uploadError() {
 				// loading动画消失
 				this.quillUpdateImg = false
-				this.$message.error('图片插入失败')
+				this.$Message.error('图片插入失败')
 			},
 
 			// 更新/创建文章
 			noteBookSaveArticle() {
+				this.editStatus = '自动保存中...';
                 if(this.articleId == 0){ 	//创建
 					let data = {
 						title: this.title,
@@ -252,12 +269,17 @@
 					};
 					this.updateArticle(data);
                 }
+                setTimeout(() => {
+					this.editStatus = '保存完成';
+                }, 1000);
 			},
 
             //删除文章
 			noteBookRemoveArticle() {
 				let data = {article_id: this.articleId};
 				this.removeArticle(data);
+				this.title = '';
+				this.content = '';
 			},
 
 			//发布文章
@@ -275,5 +297,9 @@
     .noteTab
         width 150px
         border 1px solid red
+    .editorButtons
+        margin 10px 0px
+    .editorButtons Button
+        margin-right 10px
 
 </style>

@@ -1,20 +1,20 @@
 <!--评论组件-->
 <template>
-    <div class="container">
-        <el-tag>{{comments.length}} 条评论</el-tag>
+    <div class="container" v-if="comments.length > 0">
+        <Tag>{{comments.length}} 条评论</Tag>
         <div class="comment" v-for="item in comments" :key="item.id">
             <div class="info">
                 <img class="avatar" :src="item.User && item.User.photo" width="36" height="36"/>
                 <div class="right">
-                    <div class="name">{{item.User.user_name}}</div>
+                    <div class="name">{{item.User && item.User.user_name}}</div>
                     <div class="date">{{item.comment_date | dateFormat}}</div>
                 </div>
             </div>
             <div class="content">{{item.comment_content}}</div>
             <div class="control">
                 <span class="like" @click="likeClick(item)">
-                    <i class="iconfont icon-like"></i>
-                    <span class="like-num">{{item.comment_like_count > 0 ? item.comment_like_count + '人赞' : '赞'}}</span>
+                    <i class="el-icon-thumb"> </i>
+                    <span class="like-num"> {{item.comment_like_count > 0 ? item.comment_like_count + '人赞' : '赞'}}</span>
                 </span>
                 <span class="comment-reply" @click="showReplyInput(item)">
                     <i class="iconfont icon-comment"></i>
@@ -23,6 +23,7 @@
             </div>
 
             <div class="reply">
+                <Tag v-if="item.replys && item.replys.length > 0">{{item.replys && item.replys.length}} 条回复</Tag>
                 <div class="item" v-for="reply in item.replys" :key="reply.id">
                     <div class="reply-content">
                         <!--<span class="from-name">{{reply.fromName}}</span><span>: </span>-->
@@ -38,22 +39,17 @@
                     </div>
                 </div>
 
-                <!--<div class="write-reply" v-if="item.reply && item.reply.length > 0" @click="showReplyInput(item)">-->
-                    <!--<i class="el-icon-edit"></i>-->
-                    <!--<span class="add-comment">添加新评论</span>-->
-                <!--</div>-->
                 <transition name="fade">
                     <div class="input-wrapper" v-if="showItemId === item.id">
-                        <el-input class="gray-bg-input"
+                        <Input  class="gray-bg-input"
                                   v-model="inputReply"
                                   type="textarea"
                                   :rows="3"
                                   autofocus
-                                  placeholder="写下你的回复">
-                        </el-input>
+                                  placeholder="写下你的回复" />
                         <div class="btn-control">
-                            <span class="cancel" @click="cancel">取消</span>
-                            <el-button class="btn" type="primary" @click="commitReplySure(item)">确定</el-button>
+                            <Button class="cancel" @click="cancel">取消</Button>
+                            <Button type="primary" @click="commitReplySure(item)">确定</Button>
                         </div>
                     </div>
                 </transition>
@@ -64,15 +60,11 @@
 
 <script>
     import {getUserId} from '../utils/common';
-
+    import {mapState, mapActions} from 'vuex';
+	import moment from 'moment';
 	export default {
 		props: {
-			comments: {
-				type: Array,
-				required: true
-			},
-			commitReply: Function,   //提交回复
-			getComments:   Function,   //获取评论
+            id: [String, Number]     //文章id
 		},
 
 		data() {
@@ -82,38 +74,54 @@
 			}
 		},
 
-		created() {
+        computed: {
+            ...mapState({
+				comments: state => state.comments.comments,  //文章评论
+            })
+        },
+
+		mounted() {
+			this.getComments({id: this.id});      //获取评论
 		},
 
 		methods: {
-			//评论点赞
-			likeClick(comment) {
-				let params = {
-					comment_id: comment.comment_id,
-					user_id: getUserId()
-				};
-				let _this = this;
-				this.$http.post('/api/comments/praise', params)
-					.then(res => {
-						console.log('likeClick res: ', res);
-						if (res.status != 200 || !res.data | !res.data.status) {
-							this.$message({
-								type: 'error',
-								message: '点赞失败！'
-							});
-							return;
-						}
-						_this.getComments();
-					});
-			},
+            ...mapActions([
+				'getComments',      //获取文章评论
+				'commitReply',      //提交回复
+				'likeComment',      //评论点赞
+            ]),
 
 			// 提交回复
 			commitReplySure(item) {
-				console.log('commitReply---item->', item);
-				console.log('commitReply---reply->', this.inputReply);
-				this.commitReply(item.id, this.inputReply);
-				this.inputReply = '';
-				this.showItemId = ''
+				this.commitReplyMethod(item.id, this.inputReply);
+			},
+
+			commitReplyMethod(comment_id = 0, content = '', parent_id = 0) {
+				let params = {
+					comment_id,
+					user_id: getUserId(),
+					content,
+					reply_date: moment().format('YYYY-MM-DD HH:mm:ss'),
+					parent_id
+				};
+				this.commitReply(params).then(res => {
+					this.showBox = false;
+					this.inputReply = '';
+					this.showItemId = '';
+					this.getComments({id: this.id});      //获取评论
+                });
+
+			},
+
+			//评论点赞
+			likeClick(comment) {
+				let params = {
+					comment_id: comment.id,
+					user_id: getUserId()
+				};
+				this.likeComment(params).then(res => {
+					this.getComments({id: this.id});      //获取评论
+                });
 			},
 
 			/**
@@ -209,6 +217,7 @@
             .reply {
                 margin: 10px 0;
                 border-left: 2px solid $color-main;
+                padding-left: 2px;
                 .item {
                     margin: 0 10px;
                     padding: 10px 0;
@@ -278,8 +287,6 @@
                         align-items: center;
                         padding-top: 10px;
                         .cancel {
-                            font-size: 16px;
-                            color: $text-normal;
                             margin-right: 20px;
                             cursor: pointer;
                             &:hover {

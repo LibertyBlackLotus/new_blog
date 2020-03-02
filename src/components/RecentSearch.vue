@@ -1,87 +1,86 @@
 <!-- 最近搜索组件 -->
 <template>
     <div>
-        <el-button @click="clearRecord"
-                   type="text"
+        <Modal
+                v-model="clearModal"
+                @on-ok="ok"
+                @on-cancel="cancel">
+            <p>确定清空搜索记录？</p>
+        </Modal>
+        <Button @click="clearRecordMethod"
+                   type="error"
+                    ghost
+                   style="width: 100%;"
+                   v-if="recentSearch.length > 0"
                    size="small">
-            清空
-        </el-button>
-        <el-table
-                :data="recentSearch"
-                style="width: 100%">
-            <el-table-column
-                    fixed
-                    prop="content"
-                    label="最近搜索"
-                    width="150">
-            </el-table-column>
-            <el-table-column
-                    fixed="right"
-                    label="操作"
-                    width="100">
-                <template slot-scope="scope">
-                    <el-button @click="deleteRecord(scope.row)"
-                               type="text"
-                               size="small">
-                        删除
-                    </el-button>
+            清空搜索记录
+        </Button>
+
+        <List header="搜索记录" border>
+            <ListItem v-for="item in recentSearch" :key="item.id">
+                {{item.content}}
+                <template slot="action" style="float: right;">
+                    <Button type="error" ghost @click="deleteRecordMethod(item)">删除</Button>
                 </template>
-            </el-table-column>
-        </el-table>
+            </ListItem>
+        </List>
     </div>
 </template>
 
 <script>
+    import {mapState, mapActions} from 'vuex';
 	export default {
 		props: {
 			userId: Number  //用户id
 		},
 
-		data() {
+        data(){
 			return {
-				recentSearch: []   //最近搜索记录
+				clearModal: false
             }
-		},
+        },
 
-		created: function () {
-			this.getRecentSearch();  //获取用户最近搜索记录
+        computed: {
+            ...mapState({
+				recentSearch: state => state.searchRecord.recentSearch,  //搜索记录
+            })
+        },
+
+		created () {
+			this.getRecentSearch({id: this.userId});  //获取用户最近搜索记录
 		},
 
 		methods: {
-			//获取用户最近搜索记录
-			getRecentSearch() {
-				this.$http.get('/api/record/searchRecord/user/' + this.userId)
-					.then((res) => {
-						if (res.status == 200) {
-							this.recentSearch = res.data;
-						}
-					});
-			},
+            ...mapActions([
+            	'getRecentSearch',   //获取用户最近搜索记录
+            	'deleteRecord',      //删除搜索记录
+            	'clearRecord',       //清空用户搜索记录
+            ]),
 
-            //删除搜索记录
-            deleteRecord(item){
-				this.$http.delete('/api/record/searchRecord/' + item.id)
-					.then((res) => {
-						console.log('deleteRecord: ', res);
-						if (res.status == 200) {
-							this.getRecentSearch();
-						}
-					});
-            },
-
-			//清空用户搜索记录
-			clearRecord(){
+            ok(){
 				let params = {
 					user_id: this.userId
 				};
-				this.$http.delete('/api/record/searchRecord', {data: params})
-					.then((res) => {
-						console.log('clearRecord: ', res);
-						if (res.status == 200) {
-							this.getRecentSearch()
-						}
-					});
-			}
+				this.clearRecord(params).then(res => {
+					this.getRecentSearch({id: this.userId});  //获取用户最近搜索记录
+				});
+            },
+
+            cancel(){
+            },
+
+            //删除搜索记录
+			deleteRecordMethod(item) {
+                console.log('----deleteRecordMethod--->', item);
+				this.deleteRecord({id: item.id}).then(res => {
+					this.getRecentSearch({id: this.userId});  //获取用户最近搜索记录
+                });
+			},
+
+			//清空用户搜索记录
+			clearRecordMethod() {
+            	this.clearModal = true;
+			},
 		}
 
 	}

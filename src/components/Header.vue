@@ -1,46 +1,55 @@
 <template>
-    <el-row class="header" type="flex">
-        <el-col :span="4" :offset="1" class="logo">
-            <img src="../assets/logo1.png" @click="toHome" alt="昆朋"/>
-            <span>昆朋</span>
-        </el-col>
-        <el-col :span="4">
-            <el-input
-                    placeholder="请输入搜索内容"
-                    prefix-icon="el-icon-search"
-                    size="midium"
-                    @keyup.enter.native="searchItem"
-                    v-model="keywords">
-            </el-input>
-        </el-col>
-        <el-col :span="4" :offset="10" v-if="userInfo" class="userInfo">
-            <el-row>
-                <el-dropdown @command="handleCommand">
-                      <span class="el-dropdown-link">
-                        <span class="avatar"><img :src="userInfo.photo"/></span>
-                        <i class="el-icon-arrow-down el-icon--right"></i>
-                      </span>
-                    <el-dropdown-menu slot="dropdown">
-                        <el-dropdown-item command="toMyPage">我的主页</el-dropdown-item>
-                        <el-dropdown-item command="toSettings">设置</el-dropdown-item>
-                        <el-dropdown-item command="logout">退出</el-dropdown-item>
-                    </el-dropdown-menu>
-                </el-dropdown>
-            </el-row>
-        </el-col>
-        <el-col :span="4" v-else>
-            <el-button @click="toLogin">
-                login
-            </el-button>
-        </el-col>
-        <el-col :span="4" :offset="1" v-if="userInfo">
-            <el-button @click="toNotebook">写文章</el-button>
-        </el-col>
-    </el-row>
+    <div class="headerContent">
+        <Row class="header" type="flex">
+            <i-col span="4" offset="1" class="logo">
+                <img src="../assets/logo1.png" @click="toHome" alt="昆朋"/>
+                <span>昆朋</span>
+            </i-col>
+            <i-col span="4">
+                <Input class="searchInput"
+                        placeholder="请输入搜索内容"
+                        prefix-icon="el-icon-search"
+                        size="large"
+                        search
+                        @on-enter="searchItem"
+                        @on-click="searchItem"
+                        v-model="keywords" />
+            </i-col>
+            <i-col span="4" offset="8"
+                    v-if="userInfo"
+                    class="userInfo">
+                <Row>
+                    <Dropdown @on-click="handleCommand">
+                        <a href="javascript:void(0)">
+                            <span class="el-dropdown-link">
+                            <span class="avatar">
+                                <img :src="userInfo.photo? userInfo.photo: require('../assets/avatar.png')"/>
+                            </span>
+                                <Icon type="ios-arrow-down"></Icon>
+                          </span>
+                        </a>
+                        <DropdownMenu slot="list">
+                            <DropdownItem name="toMyPage">我的主页</DropdownItem>
+                            <DropdownItem name="toSettings">设置</DropdownItem>
+                            <DropdownItem name="logout">退出</DropdownItem>
+                        </DropdownMenu>
+                    </Dropdown>
+                </Row>
+            </i-col>
+            <i-col span="4" offset="10" v-else>
+                <Button @click="toLogin">
+                    login
+                </Button>
+            </i-col>
+            <i-col span="4" offset="1" v-if="userInfo">
+                <Button @click="toNotebook">写文章</Button>
+            </i-col>
+        </Row>
+    </div>
 </template>
 
 <script>
-    import {getUserInfo} from '../utils/common';
+    import {getUserInfo, getUserId, openBlank} from '../utils/common';
 	export default {
 		data() {
 			return {
@@ -52,12 +61,8 @@
 		methods: {
             //搜索
 			searchItem(){
-				let keywords = this.keywords;
-				let {href} = this.$router.resolve({
-					name: 'searchResult',
-					params: {keywords}
-				});
-				window.open(href, '_blank');
+				let params =  {keywords: this.keywords};
+				openBlank(this.$router, 'searchResult', params);
             },
 
 			handleCommand(command) {
@@ -78,11 +83,8 @@
 
 			//跳转至我的页
 			toMyPage() {
-				const {href} = this.$router.resolve({
-					name: 'mypage',
-					params: {id: this.userInfo.id}
-				});
-				window.open(href, '_blank');
+//				openBlank(this.$router, 'mypage', {id: getUserId()});
+				this.$router.push({name: 'mypage', params: {id: getUserId()}});
 			},
 
 			//跳转至设置
@@ -99,10 +101,7 @@
 
 			//跳转至发布文章页
 			toNotebook() {
-				const {href} = this.$router.resolve({
-					path: '/notebook',
-				});
-				window.open(href, '_blank');
+				openBlank(this.$router, 'notebook');
 			},
 
 			//跳转至首页
@@ -119,6 +118,9 @@
 </script>
 
 <style lang="stylus" scoped>
+    .headerContent
+        height 60px
+        line-height 60px
     .header
         height 60px !important
         line-height 60px !important
@@ -128,15 +130,10 @@
         width 100%
         top 0
         z-index 10000
-
     .logo img
         height 40px
         vertical-align middle
         cursor pointer
-
-    .avatar
-        float left
-        cursor: pointer
 
     .avatar img
         height 40px
